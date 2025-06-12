@@ -1,0 +1,178 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>TikTok Video Feature Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f9fafc;
+      color: #1a202c;
+      padding: 2rem;
+      max-width: 1300px;
+      margin: auto;
+    }
+    h1 { text-align: center; color: #2b6cb0; margin-bottom: 1rem; }
+    #searchInput {
+      width: 100%; padding: 0.6rem; font-size: 1rem;
+      margin: 1rem 0 2rem 0; border: 1px solid #ccc; border-radius: 6px;
+    }
+    .row { display: flex; flex-wrap: wrap; gap: 2rem; }
+    .video-column, .feature-column {
+      flex: 1 1 45%; min-width: 300px;
+    }
+    iframe {
+      width: 100%; height: 500px; border: none; border-radius: 10px;
+    }
+    .card {
+      background: #fff; padding: 1rem; border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem;
+    }
+    .card h3 { margin-bottom: 0.8rem; color: #2b6cb0; }
+    .feature { margin: 0.4rem 0; }
+    .nav-btns {
+      display: flex; justify-content: space-between; margin-top: 1rem;
+    }
+    .nav-btns button {
+      background: #2b6cb0; color: white; border: none;
+      padding: 0.6rem 1.2rem; border-radius: 6px;
+      font-weight: bold; cursor: pointer;
+    }
+    .nav-btns button:disabled { background: #ccc; cursor: not-allowed; }
+    .progress { text-align: center; font-weight: bold; margin-top: 1rem; }
+    .bottom-explanation {
+      margin-top: 3rem; background: #edf2f7;
+      padding: 1.5rem; border-radius: 8px;
+    }
+    @media (max-width: 768px) {
+      .row { flex-direction: column; }
+      iframe { height: 400px; }
+    }
+  </style>
+</head>
+<body>
+  <h1>📊 TikTok Video Feature Dashboard</h1>
+  <input type="text" id="searchInput" placeholder="🔍 Search by filename..." />
+  <div class="progress" id="progressCounter">Loading...</div>
+  <div class="row" id="videoFeatureLayout">Loading viewer...</div>
+
+  <div class="bottom-explanation">
+    <h3>🧠 What is Multimodal Overload?</h3>
+    <p>Multimodal overload refers to the cognitive burden caused by simultaneous stimulation across multiple modalities.</p>
+    <ul>
+      <li><b>Emoji Count</b>: Number of emojis present</li>
+      <li><b>Animated Text</b>: Whether text is animated</li>
+      <li><b>Motion + Volume</b>: High motion + audio dynamics may overwhelm viewers</li>
+    </ul>
+  </div>
+
+<script>
+let videoData = [];
+let filteredData = [];
+let currentIndex = 0;
+
+function tf(val) {
+  return (val === "TRUE" || val === true || val === 1 || val === "1") ? "✔️ Yes" : "❌ No";
+}
+
+function showVideo(index) {
+  const video = filteredData[index];
+  if (!video) return;
+
+  const layout = document.getElementById("videoFeatureLayout");
+  const progress = document.getElementById("progressCounter");
+
+  const embedUrl = `https://www.tiktok.com/embed/v2/${video.video_id}`;
+
+  progress.textContent = `Video ${index + 1} of ${filteredData.length}`;
+
+  layout.innerHTML = `
+    <div class="video-column">
+      <iframe src="${embedUrl}" allowfullscreen></iframe>
+      <div class="nav-btns">
+        <button onclick="goPrev()" id="prevBtn">⬅️ Previous</button>
+        <button onclick="goNext()" id="nextBtn">Next ➡️</button>
+      </div>
+    </div>
+    <div class="feature-column">
+      <div class="card">
+        <h3>🎞️ Temporal Dynamics</h3>
+        <div class="feature"><b>Duration:</b> ${video["Duration (s)"]} sec</div>
+        <div class="feature"><b>Scene Cuts:</b> ${video["Scene Cuts"]}</div>
+        <div class="feature"><b>Mean Frame Duration:</b> ${video["Mean Frame Duration (ms)"]} ms</div>
+        <div class="feature"><b>Min Duration:</b> ${video["Min (ms)"]}</div>
+      </div>
+
+      <div class="card">
+        <h3>🔊 Audio Complexity</h3>
+        <div class="feature"><b>Volume:</b> ${video["avg_volume_dBFS"]} dB</div>
+        <div class="feature"><b>Loudness Range:</b> ${video["input_lra (dB)"]}</div>
+        <div class="feature"><b>Original Sound:</b> ${tf(video.original_sound)}</div>
+        <div class="feature"><b>Speech (AST):</b> ${tf(video.speech_ast)}</div>
+        <div class="feature"><b>Speech (Whisper):</b> ${tf(video.speech_whisper)}</div>
+      </div>
+
+      <div class="card">
+        <h3>🌀 Motion Analysis</h3>
+        <div class="feature"><b>Motion Vectors:</b> ${video.MotionVectorsPerFrame}</div>
+        <div class="feature"><b>Avg Motion Intensity:</b> ${video.AvgMotionIntensityPerPixel}</div>
+      </div>
+
+      <div class="card">
+        <h3>🧠 Visual/Text Features</h3>
+        <div class="feature"><b>Animated Text:</b> ${tf(video.animated_text)}</div>
+        <div class="feature"><b>Emoji Count:</b> ${video.emoji_count}</div>
+        <div class="feature"><b>Text Overlay Ratio:</b> ${video.text_overlay_ratio}</div>
+      </div>
+    </div>
+  `;
+
+  updateButtons();
+}
+
+function goPrev() {
+  if (currentIndex > 0) {
+    currentIndex--;
+    showVideo(currentIndex);
+  }
+}
+function goNext() {
+  if (currentIndex < filteredData.length - 1) {
+    currentIndex++;
+    showVideo(currentIndex);
+  }
+}
+function updateButtons() {
+  document.getElementById("prevBtn").disabled = currentIndex === 0;
+  document.getElementById("nextBtn").disabled = currentIndex === filteredData.length - 1;
+}
+function applySearch() {
+  const query = document.getElementById("searchInput").value.toLowerCase();
+  filteredData = videoData.filter(v => (v.Filename || "").toLowerCase().includes(query));
+  currentIndex = 0;
+  showVideo(currentIndex);
+}
+
+window.onload = () => {
+  fetch("tiktok_video_dashboard_40videos_corrected_links.csv")
+    .then(res => res.text())
+    .then(csv => {
+      Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: results => {
+          videoData = results.data;
+          filteredData = [...videoData];
+          showVideo(currentIndex);
+        }
+      });
+    });
+
+  document.getElementById("searchInput").addEventListener("input", applySearch);
+};
+</script>
+</body>
+</html>
