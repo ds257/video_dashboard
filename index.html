@@ -42,13 +42,20 @@
     }
     .nav-btns button:disabled { background: #ccc; cursor: not-allowed; }
     .progress { text-align: center; font-weight: bold; margin-top: 1rem; }
-    .bottom-explanation {
-      margin-top: 3rem; background: #edf2f7;
-      padding: 1.5rem; border-radius: 8px;
+    table.bottom-feature-table {
+      width: 100%;
+      margin-top: 1rem;
+      border-collapse: collapse;
+      font-size: 0.95rem;
     }
-    @media (max-width: 768px) {
-      .row { flex-direction: column; }
-      iframe { height: 400px; }
+    table.bottom-feature-table td, table.bottom-feature-table th {
+      border: 1px solid #ccc;
+      padding: 0.5rem 0.75rem;
+    }
+    table.bottom-feature-table th {
+      background: #ebf8ff;
+      text-align: left;
+      color: #2b6cb0;
     }
   </style>
 </head>
@@ -58,23 +65,17 @@
   <div class="progress" id="progressCounter">Loading...</div>
   <div class="row" id="videoFeatureLayout">Loading viewer...</div>
 
-  <div class="bottom-explanation">
-    <h3>🧠 What is Multimodal Overload?</h3>
-    <p>Multimodal overload refers to the cognitive burden caused by simultaneous stimulation across multiple modalities.</p>
-    <ul>
-      <li><b>Emoji Count</b>: Number of emojis present</li>
-      <li><b>Animated Text</b>: Whether text is animated</li>
-      <li><b>Motion + Volume</b>: High motion + audio dynamics may overwhelm viewers</li>
-    </ul>
-  </div>
-
 <script>
 let videoData = [];
 let filteredData = [];
 let currentIndex = 0;
 
 function tf(val) {
-  return (val === "TRUE" || val === true || val === 1 || val === "1") ? "✔️ Yes" : "❌ No";
+  return (val === "TRUE" || val === true || val === 1 || val === "1") ? "Yes" : "No";
+}
+
+function isTruthy(val) {
+  return (val === "TRUE" || val === true || val === 1 || val === "1");
 }
 
 function extractVideoIdFromUrl(url) {
@@ -88,11 +89,29 @@ function showVideo(index) {
 
   const layout = document.getElementById("videoFeatureLayout");
   const progress = document.getElementById("progressCounter");
-
   const videoId = extractVideoIdFromUrl(video.URL || video.url || video.video_url || "");
   const embedUrl = videoId ? `https://www.tiktok.com/embed/v2/${videoId}` : "";
 
   progress.textContent = `Video ${index + 1} of ${filteredData.length}`;
+
+  // Conditionally show annotation card only if one or more are 1
+  const annotationKeys = [
+    "Package", "Pouch", "Brand_ZYN", "VT_Lifestyle",
+    "human_subjects", "ethnic_minority", "child_adoles", "YA"
+  ];
+  const anyAnnotations = annotationKeys.some(k => isTruthy(video[k]));
+
+  let annotationHTML = "";
+  if (anyAnnotations) {
+    annotationHTML = `
+      <div class="card">
+        <h3>🏷️ Annotation Tags</h3>
+        ${annotationKeys.map(k => `
+          <div class="feature"><b>${k.replace(/_/g, ' ')}:</b> ${tf(video[k])}</div>
+        `).join("")}
+      </div>
+    `;
+  }
 
   layout.innerHTML = `
     <div class="video-column">
@@ -101,40 +120,25 @@ function showVideo(index) {
         <button onclick="goPrev()" id="prevBtn">⬅️ Previous</button>
         <button onclick="goNext()" id="nextBtn">Next ➡️</button>
       </div>
+      <table class="bottom-feature-table">
+        <tr><th>Feature</th><th>Value</th></tr>
+        <tr><td>Duration</td><td>${video["Duration"]}</td></tr>
+        <tr><td>Scene Cuts</td><td>${video["Scene_Cuts"]}</td></tr>
+        <tr><td>Mean Frame Duration</td><td>${video["Mean_Frame_Duration"]}</td></tr>
+        <tr><td>Frame Duration Std</td><td>${video["Frame_Duration_Std"]}</td></tr>
+        <tr><td>Min Frame Duration</td><td>${video["Min_Frame_Duration"]}</td></tr>
+        <tr><td>Max Frame Duration</td><td>${video["Max_Frame_Duration"]}</td></tr>
+        <tr><td>Volume Range</td><td>${video["Volume_Range"]}</td></tr>
+        <tr><td>Avg Motion Magnitude</td><td>${video["Avg_Motion_Magnitude"]}</td></tr>
+        <tr><td>Avg Vector Count</td><td>${video["Avg_Vector_Count"]}</td></tr>
+        <tr><td>Animated Text</td><td>${tf(video["Animated_Text"])}</td></tr>
+        <tr><td>Emoji Count</td><td>${video["Emoji_Count"]}</td></tr>
+        <tr><td>Speech Detected AST</td><td>${tf(video["Speech_Detected_AST"])}</td></tr>
+      </table>
     </div>
 
     <div class="feature-column">
-      <div class="card">
-        <h3>🎞️ Temporal & Motion Features</h3>
-        <div class="feature"><b>Duration:</b> ${video["Duration"]}</div>
-        <div class="feature"><b>Scene Cuts:</b> ${video["Scene_Cuts"]}</div>
-        <div class="feature"><b>Mean Frame Duration:</b> ${video["Mean_Frame_Duration"]}</div>
-        <div class="feature"><b>Frame Duration Std:</b> ${video["Frame_Duration_Std"]}</div>
-        <div class="feature"><b>Min Duration:</b> ${video["Min_Frame_Duration"]}</div>
-        <div class="feature"><b>Max Duration:</b> ${video["Max_Frame_Duration"]}</div>
-        <div class="feature"><b>Avg Motion Magnitude:</b> ${video["Avg_Motion_Magnitude"]}</div>
-        <div class="feature"><b>Avg Vector Count:</b> ${video["Avg_Vector_Count"]}</div>
-      </div>
-
-      <div class="card">
-        <h3>🔊 Audio/Text Features</h3>
-        <div class="feature"><b>Volume Range:</b> ${video["Volume_Range"]}</div>
-        <div class="feature"><b>Speech Detected (AST):</b> ${tf(video["Speech_Detected_AST"])}</div>
-        <div class="feature"><b>Animated Text:</b> ${tf(video["Animated_Text"])}</div>
-        <div class="feature"><b>Emoji Count:</b> ${video["Emoji_Count"]}</div>
-      </div>
-
-      <div class="card">
-        <h3>🏷️ Annotation Tags</h3>
-        <div class="feature"><b>Package Visible:</b> ${tf(video["Package"])}</div>
-        <div class="feature"><b>Pouch Visible:</b> ${tf(video["Pouch"])}</div>
-        <div class="feature"><b>ZYN Brand:</b> ${tf(video["Brand_ZYN"])}</div>
-        <div class="feature"><b>Lifestyle Theme:</b> ${tf(video["VT_Lifestyle"])}</div>
-        <div class="feature"><b>Human Subject:</b> ${tf(video["human_subjects"])}</div>
-        <div class="feature"><b>Ethnic Minority:</b> ${tf(video["ethnic_minority"])}</div>
-        <div class="feature"><b>Child/Adolescent:</b> ${tf(video["child_adoles"])}</div>
-        <div class="feature"><b>Young Adult:</b> ${tf(video["YA"])}</div>
-      </div>
+      ${annotationHTML}
     </div>
   `;
 
