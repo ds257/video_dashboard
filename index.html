@@ -57,6 +57,14 @@
       text-align: left;
       color: #2b6cb0;
     }
+    .transcript-block {
+      background: #edf2f7;
+      padding: 1rem;
+      margin-top: 1rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -67,16 +75,25 @@
 
 <script>
 let videoData = [];
+let transcriptData = {};
 let filteredData = [];
 let currentIndex = 0;
 
 function tf(val) {
-  return (val === "TRUE" || val === true || val === 1 || val === "1") ? "Yes" : "No";
+  const v = String(val || "").trim().toLowerCase();
+  return v === "1" || v === "1.0" || v === "true" ? "Yes" : "No";
 }
 
 function extractVideoIdFromUrl(url) {
   const match = url.match(/\/video\/(\d+)/);
   return match ? match[1] : null;
+}
+
+function matchTranscript(videoRow) {
+  const filename = videoRow["Filename"] || "";
+  const keys = Object.keys(transcriptData);
+  const match = keys.find(k => filename.includes(k));
+  return match ? transcriptData[match] : "Transcript not available.";
 }
 
 function showVideo(index) {
@@ -87,6 +104,7 @@ function showVideo(index) {
   const progress = document.getElementById("progressCounter");
   const videoId = extractVideoIdFromUrl(video.URL || video.url || video.video_url || "");
   const embedUrl = videoId ? `https://www.tiktok.com/embed/v2/${videoId}` : "";
+  const transcriptText = matchTranscript(video);
 
   progress.textContent = `Video ${index + 1} of ${filteredData.length}`;
 
@@ -114,6 +132,8 @@ function showVideo(index) {
         <button onclick="goPrev()" id="prevBtn">⬅️ Previous</button>
         <button onclick="goNext()" id="nextBtn">Next ➡️</button>
       </div>
+
+      <div class="transcript-block"><b>📝 Transcript:</b><br>${transcriptText}</div>
 
       <div class="card">
         <h3>🕒 Temporal Dynamics</h3>
@@ -147,7 +167,6 @@ function showVideo(index) {
         <h3>🌀 Multimodal Overload</h3>
         <table class="bottom-feature-table">
           <tr><td><b>Animated Text</b></td><td>${tf(video["Animated_Text"])}</td></tr>
-          <tr><td><b>Emoji Count</b></td><td>${video["Emoji_Count"]}</td></tr>
         </table>
       </div>
     </div>
@@ -186,7 +205,7 @@ function applySearch() {
   showVideo(currentIndex);
 }
 
-window.onload = () => {
+function loadMainCSV() {
   fetch("TikTok_Dataset_with_Correct_Ground_Truth_Matching.csv")
     .then(res => res.text())
     .then(csv => {
@@ -200,7 +219,30 @@ window.onload = () => {
         }
       });
     });
+}
 
+function loadTranscriptCSV() {
+  fetch("video_metadata_whisper.csv")
+    .then(res => res.text())
+    .then(csv => {
+      Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: results => {
+          results.data.forEach(row => {
+            if (row["Video_File"] && row["Transcript"]) {
+              const base = row["Video_File"].replace(".mp4", "").trim();
+              transcriptData[base] = row["Transcript"];
+            }
+          });
+          loadMainCSV();
+        }
+      });
+    });
+}
+
+window.onload = () => {
+  loadTranscriptCSV();
   document.getElementById("searchInput").addEventListener("input", applySearch);
 };
 </script>
