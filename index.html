@@ -90,7 +90,7 @@ function extractVideoIdFromUrl(url) {
 }
 
 function matchTranscript(videoRow) {
-  const filename = videoRow["Filename"] || "";
+  const filename = videoRow["Video_File"] || "";
   const keys = Object.keys(transcriptData);
   const match = keys.find(k => filename.includes(k));
   return match ? transcriptData[match] : "Transcript not available.";
@@ -133,6 +133,11 @@ function showVideo(index) {
         <button onclick="goNext()" id="nextBtn">Next ➡️</button>
       </div>
 
+      <div class="card">
+        <h3>🏷️ Annotation Tags</h3>
+        ${annotationsHTML}
+      </div>
+
       <div class="transcript-block"><b>📝 Transcript:</b><br>${transcriptText}</div>
 
       <div class="card">
@@ -156,7 +161,7 @@ function showVideo(index) {
       </div>
 
       <div class="card">
-        <h3>🎞️ Motion Analysis</h3>
+        <h3>🎮 Motion Analysis</h3>
         <table class="bottom-feature-table">
           <tr><td><b>Avg Vector Count</b></td><td>${video["Avg_Vector_Count"]}</td></tr>
           <tr><td><b>Avg Motion Magnitude</b></td><td>${video["Avg_Motion_Magnitude"]}</td></tr>
@@ -168,13 +173,6 @@ function showVideo(index) {
         <table class="bottom-feature-table">
           <tr><td><b>Animated Text</b></td><td>${tf(video["Animated_Text"])}</td></tr>
         </table>
-      </div>
-    </div>
-
-    <div class="feature-column">
-      <div class="card">
-        <h3>🏷️ Annotation Tags</h3>
-        ${annotationsHTML}
       </div>
     </div>
   `;
@@ -200,7 +198,7 @@ function updateButtons() {
 }
 function applySearch() {
   const query = document.getElementById("searchInput").value.toLowerCase();
-  filteredData = videoData.filter(v => (v.Filename || "").toLowerCase().includes(query));
+  filteredData = videoData.filter(v => (v.Video_File || "").toLowerCase().includes(query));
   currentIndex = 0;
   showVideo(currentIndex);
 }
