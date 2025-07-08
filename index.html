@@ -44,7 +44,7 @@
     .progress { text-align: center; font-weight: bold; margin-top: 1rem; }
     table.bottom-feature-table {
       width: 100%;
-      margin-top: 1rem;
+      margin-top: 0.5rem;
       border-collapse: collapse;
       font-size: 0.95rem;
     }
@@ -74,10 +74,6 @@ function tf(val) {
   return (val === "TRUE" || val === true || val === 1 || val === "1") ? "Yes" : "No";
 }
 
-function isTruthy(val) {
-  return (val === "TRUE" || val === true || val === 1 || val === "1");
-}
-
 function extractVideoIdFromUrl(url) {
   const match = url.match(/\/video\/(\d+)/);
   return match ? match[1] : null;
@@ -94,24 +90,22 @@ function showVideo(index) {
 
   progress.textContent = `Video ${index + 1} of ${filteredData.length}`;
 
-  // Conditionally show annotation card only if one or more are 1
   const annotationKeys = [
-    "Package", "Pouch", "Brand_ZYN", "VT_Lifestyle",
-    "human_subjects", "ethnic_minority", "child_adoles", "YA"
+    { label: "Package", key: "Package" },
+    { label: "Pouch", key: "Pouch" },
+    { label: "Brand ZYN", key: "Brand_ZYN" },
+    { label: "Lifestyle Theme", key: "VT_Lifestyle" },
+    { label: "Human Subject", key: "human_subjects" },
+    { label: "Ethnic Minority", key: "ethnic_minority" },
+    { label: "Child/Adolescent", key: "child_adoles" },
+    { label: "Young Adult", key: "YA" }
   ];
-  const anyAnnotations = annotationKeys.some(k => isTruthy(video[k]));
 
-  let annotationHTML = "";
-  if (anyAnnotations) {
-    annotationHTML = `
-      <div class="card">
-        <h3>🏷️ Annotation Tags</h3>
-        ${annotationKeys.map(k => `
-          <div class="feature"><b>${k.replace(/_/g, ' ')}:</b> ${tf(video[k])}</div>
-        `).join("")}
-      </div>
-    `;
-  }
+  const annotationsHTML = annotationKeys.map(item => {
+    const rawValue = video[item.key];
+    const value = tf(rawValue);
+    return `<div class="feature"><b>${item.label}:</b> ${value}</div>`;
+  }).join("");
 
   layout.innerHTML = `
     <div class="video-column">
@@ -120,25 +114,49 @@ function showVideo(index) {
         <button onclick="goPrev()" id="prevBtn">⬅️ Previous</button>
         <button onclick="goNext()" id="nextBtn">Next ➡️</button>
       </div>
-      <table class="bottom-feature-table">
-        <tr><th>Feature</th><th>Value</th></tr>
-        <tr><td>Duration</td><td>${video["Duration"]}</td></tr>
-        <tr><td>Scene Cuts</td><td>${video["Scene_Cuts"]}</td></tr>
-        <tr><td>Mean Frame Duration</td><td>${video["Mean_Frame_Duration"]}</td></tr>
-        <tr><td>Frame Duration Std</td><td>${video["Frame_Duration_Std"]}</td></tr>
-        <tr><td>Min Frame Duration</td><td>${video["Min_Frame_Duration"]}</td></tr>
-        <tr><td>Max Frame Duration</td><td>${video["Max_Frame_Duration"]}</td></tr>
-        <tr><td>Volume Range</td><td>${video["Volume_Range"]}</td></tr>
-        <tr><td>Avg Motion Magnitude</td><td>${video["Avg_Motion_Magnitude"]}</td></tr>
-        <tr><td>Avg Vector Count</td><td>${video["Avg_Vector_Count"]}</td></tr>
-        <tr><td>Animated Text</td><td>${tf(video["Animated_Text"])}</td></tr>
-        <tr><td>Emoji Count</td><td>${video["Emoji_Count"]}</td></tr>
-        <tr><td>Speech Detected AST</td><td>${tf(video["Speech_Detected_AST"])}</td></tr>
-      </table>
+
+      <div class="card">
+        <h3>🕒 Temporal Dynamics</h3>
+        <table class="bottom-feature-table">
+          <tr><td><b>Duration</b></td><td>${video["Duration"]}</td></tr>
+          <tr><td><b>Scene Cuts</b></td><td>${video["Scene_Cuts"]}</td></tr>
+          <tr><td><b>Mean Frame Duration</b></td><td>${video["Mean_Frame_Duration"]}</td></tr>
+          <tr><td><b>Frame Duration Std</b></td><td>${video["Frame_Duration_Std"]}</td></tr>
+          <tr><td><b>Min Frame Duration</b></td><td>${video["Min_Frame_Duration"]}</td></tr>
+          <tr><td><b>Max Frame Duration</b></td><td>${video["Max_Frame_Duration"]}</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>🔊 Audio Complexity</h3>
+        <table class="bottom-feature-table">
+          <tr><td><b>Volume Range</b></td><td>${video["Volume_Range"]}</td></tr>
+          <tr><td><b>Speech Detected AST</b></td><td>${tf(video["Speech_Detected_AST"])}</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>🎞️ Motion Analysis</h3>
+        <table class="bottom-feature-table">
+          <tr><td><b>Avg Vector Count</b></td><td>${video["Avg_Vector_Count"]}</td></tr>
+          <tr><td><b>Avg Motion Magnitude</b></td><td>${video["Avg_Motion_Magnitude"]}</td></tr>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3>🌀 Multimodal Overload</h3>
+        <table class="bottom-feature-table">
+          <tr><td><b>Animated Text</b></td><td>${tf(video["Animated_Text"])}</td></tr>
+          <tr><td><b>Emoji Count</b></td><td>${video["Emoji_Count"]}</td></tr>
+        </table>
+      </div>
     </div>
 
     <div class="feature-column">
-      ${annotationHTML}
+      <div class="card">
+        <h3>🏷️ Annotation Tags</h3>
+        ${annotationsHTML}
+      </div>
     </div>
   `;
 
