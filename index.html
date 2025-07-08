@@ -51,13 +51,21 @@
     }
     .nav-btns button:disabled { background: #ccc; cursor: not-allowed; }
     .progress { text-align: center; font-weight: bold; margin-top: 1rem; }
-    .transcript-block {
+    .transcript-toggle {
       background: #edf2f7;
       padding: 1rem;
-      margin-top: 1rem;
+      margin-top: 1.5rem;
       border-radius: 8px;
       font-size: 0.95rem;
       line-height: 1.4;
+    }
+    .transcript-toggle summary {
+      font-weight: bold;
+      cursor: pointer;
+    }
+    mark {
+      background-color: #facc15;
+      padding: 0 2px;
     }
   </style>
 </head>
@@ -72,6 +80,7 @@ let videoData = [];
 let transcriptData = {};
 let filteredData = [];
 let currentIndex = 0;
+let lastQuery = "";
 
 function tf(val) {
   const v = String(val || "").trim().toLowerCase();
@@ -81,6 +90,13 @@ function tf(val) {
 function extractVideoIdFromUrl(url) {
   const match = url.match(/\/video\/(\d+)/);
   return match ? match[1] : null;
+}
+
+function highlightTranscript(text, query) {
+  if (!query) return text;
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`(${escaped})`, 'gi');
+  return text.replace(regex, '<mark>$1</mark>');
 }
 
 function matchTranscript(videoRow) {
@@ -96,7 +112,7 @@ function showVideo(index) {
   const progress = document.getElementById("progressCounter");
   const videoId = extractVideoIdFromUrl(video.URL || video.url || video.video_url || "");
   const embedUrl = videoId ? `https://www.tiktok.com/embed/v2/${videoId}` : "";
-  const transcriptText = matchTranscript(video);
+  const transcriptText = highlightTranscript(matchTranscript(video), lastQuery);
 
   progress.textContent = `Video ${index + 1} of ${filteredData.length}`;
 
@@ -150,6 +166,10 @@ function showVideo(index) {
         <button onclick="goPrev()" id="prevBtn">⬅️ Previous</button>
         <button onclick="goNext()" id="nextBtn">Next ➡️</button>
       </div>
+      <details class="transcript-toggle" open>
+        <summary>📝 Transcript (click to collapse)</summary>
+        <div>${transcriptText}</div>
+      </details>
     </div>
     <div class="feature-column">
       <div class="card">
@@ -157,7 +177,6 @@ function showVideo(index) {
         ${annotationsHTML}
       </div>
       ${temporal + audio + motion}
-      <div class="transcript-block"><b>📝 Transcript:</b><br>${transcriptText}</div>
     </div>
   `;
 
@@ -182,6 +201,7 @@ function updateButtons() {
 }
 function applySearch() {
   const query = document.getElementById("searchInput").value.toLowerCase();
+  lastQuery = query;
   filteredData = videoData.filter(v => {
     const fileMatch = (v.Video_File || "").toLowerCase().includes(query);
     const transcript = transcriptData[(v.Video_File || "").replace(".mp4", "").trim()] || "";
