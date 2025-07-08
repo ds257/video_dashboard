@@ -17,11 +17,20 @@
     h1 { text-align: center; color: #2b6cb0; margin-bottom: 1rem; }
     #searchInput {
       width: 100%; padding: 0.6rem; font-size: 1rem;
-      margin: 1rem 0 2rem 0; border: 1px solid #ccc; border-radius: 6px;
+      margin: 1rem 0; border: 1px solid #ccc; border-radius: 6px;
     }
-    .row { display: flex; flex-wrap: wrap; gap: 2rem; }
-    .video-column, .feature-column {
-      flex: 1 1 45%; min-width: 300px;
+    .row {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 2rem;
+      flex-wrap: nowrap;
+    }
+    .video-column {
+      flex: 2 1 60%; min-width: 300px;
+    }
+    .feature-column {
+      flex: 1 1 40%; min-width: 300px;
     }
     iframe {
       width: 100%; height: 500px; border: none; border-radius: 10px;
@@ -42,21 +51,6 @@
     }
     .nav-btns button:disabled { background: #ccc; cursor: not-allowed; }
     .progress { text-align: center; font-weight: bold; margin-top: 1rem; }
-    table.bottom-feature-table {
-      width: 100%;
-      margin-top: 0.5rem;
-      border-collapse: collapse;
-      font-size: 0.95rem;
-    }
-    table.bottom-feature-table td, table.bottom-feature-table th {
-      border: 1px solid #ccc;
-      padding: 0.5rem 0.75rem;
-    }
-    table.bottom-feature-table th {
-      background: #ebf8ff;
-      text-align: left;
-      color: #2b6cb0;
-    }
     .transcript-block {
       background: #edf2f7;
       padding: 1rem;
@@ -69,7 +63,7 @@
 </head>
 <body>
   <h1>📊 TikTok Addictive Behavior Dashboard</h1>
-  <input type="text" id="searchInput" placeholder="🔍 Search by filename..." />
+  <input type="text" id="searchInput" placeholder="🔍 Search by filename or keyword..." />
   <div class="progress" id="progressCounter">Loading...</div>
   <div class="row" id="videoFeatureLayout">Loading viewer...</div>
 
@@ -90,10 +84,8 @@ function extractVideoIdFromUrl(url) {
 }
 
 function matchTranscript(videoRow) {
-  const filename = videoRow["Video_File"] || "";
-  const keys = Object.keys(transcriptData);
-  const match = keys.find(k => filename.includes(k));
-  return match ? transcriptData[match] : "Transcript not available.";
+  const filename = (videoRow["Video_File"] || "").replace(".mp4", "").trim();
+  return transcriptData[filename] || "Transcript not available.";
 }
 
 function showVideo(index) {
@@ -125,6 +117,32 @@ function showVideo(index) {
     return `<div class="feature"><b>${item.label}:</b> ${value}</div>`;
   }).join("");
 
+  const temporal = `
+    <div class="card">
+      <h3>⏱️ Temporal Dynamics</h3>
+      <div class="feature"><b>Duration:</b> ${video.Duration}</div>
+      <div class="feature"><b>Scene Cuts:</b> ${video.Scene_Cuts}</div>
+      <div class="feature"><b>Mean Frame Duration:</b> ${video.Mean_Frame_Duration}</div>
+      <div class="feature"><b>Frame Duration Std:</b> ${video.Frame_Duration_Std}</div>
+      <div class="feature"><b>Min Frame Duration:</b> ${video.Min_Frame_Duration}</div>
+      <div class="feature"><b>Max Frame Duration:</b> ${video.Max_Frame_Duration}</div>
+    </div>`;
+
+  const audio = `
+    <div class="card">
+      <h3>🔊 Audio Complexity</h3>
+      <div class="feature"><b>Volume Range:</b> ${video.Volume_Range}</div>
+    </div>`;
+
+  const motion = `
+    <div class="card">
+      <h3>🎥 Motion Analysis</h3>
+      <div class="feature"><b>Avg Motion Magnitude:</b> ${video.Avg_Motion_Magnitude}</div>
+      <div class="feature"><b>Avg Vector Count:</b> ${video.Avg_Vector_Count}</div>
+      <div class="feature"><b>Animated Text:</b> ${tf(video.Animated_Text)}</div>
+      <div class="feature"><b>Speech Detected (AST):</b> ${tf(video.Speech_Detected_AST)}</div>
+    </div>`;
+
   layout.innerHTML = `
     <div class="video-column">
       <iframe src="${embedUrl}" allowfullscreen></iframe>
@@ -132,48 +150,14 @@ function showVideo(index) {
         <button onclick="goPrev()" id="prevBtn">⬅️ Previous</button>
         <button onclick="goNext()" id="nextBtn">Next ➡️</button>
       </div>
-
+    </div>
+    <div class="feature-column">
       <div class="card">
         <h3>🏷️ Annotation Tags</h3>
         ${annotationsHTML}
       </div>
-
+      ${temporal + audio + motion}
       <div class="transcript-block"><b>📝 Transcript:</b><br>${transcriptText}</div>
-
-      <div class="card">
-        <h3>🕒 Temporal Dynamics</h3>
-        <table class="bottom-feature-table">
-          <tr><td><b>Duration</b></td><td>${video["Duration"]}</td></tr>
-          <tr><td><b>Scene Cuts</b></td><td>${video["Scene_Cuts"]}</td></tr>
-          <tr><td><b>Mean Frame Duration</b></td><td>${video["Mean_Frame_Duration"]}</td></tr>
-          <tr><td><b>Frame Duration Std</b></td><td>${video["Frame_Duration_Std"]}</td></tr>
-          <tr><td><b>Min Frame Duration</b></td><td>${video["Min_Frame_Duration"]}</td></tr>
-          <tr><td><b>Max Frame Duration</b></td><td>${video["Max_Frame_Duration"]}</td></tr>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>🔊 Audio Complexity</h3>
-        <table class="bottom-feature-table">
-          <tr><td><b>Volume Range</b></td><td>${video["Volume_Range"]}</td></tr>
-          <tr><td><b>Speech Detected AST</b></td><td>${tf(video["Speech_Detected_AST"])}</td></tr>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>🎮 Motion Analysis</h3>
-        <table class="bottom-feature-table">
-          <tr><td><b>Avg Vector Count</b></td><td>${video["Avg_Vector_Count"]}</td></tr>
-          <tr><td><b>Avg Motion Magnitude</b></td><td>${video["Avg_Motion_Magnitude"]}</td></tr>
-        </table>
-      </div>
-
-      <div class="card">
-        <h3>🌀 Multimodal Overload</h3>
-        <table class="bottom-feature-table">
-          <tr><td><b>Animated Text</b></td><td>${tf(video["Animated_Text"])}</td></tr>
-        </table>
-      </div>
     </div>
   `;
 
@@ -198,7 +182,12 @@ function updateButtons() {
 }
 function applySearch() {
   const query = document.getElementById("searchInput").value.toLowerCase();
-  filteredData = videoData.filter(v => (v.Video_File || "").toLowerCase().includes(query));
+  filteredData = videoData.filter(v => {
+    const fileMatch = (v.Video_File || "").toLowerCase().includes(query);
+    const transcript = transcriptData[(v.Video_File || "").replace(".mp4", "").trim()] || "";
+    const transcriptMatch = transcript.toLowerCase().includes(query);
+    return fileMatch || transcriptMatch;
+  });
   currentIndex = 0;
   showVideo(currentIndex);
 }
