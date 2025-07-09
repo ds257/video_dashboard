@@ -14,10 +14,18 @@
       max-width: 1300px;
       margin: auto;
     }
-    h1 { text-align: center; color: #2b6cb0; margin-bottom: 1rem; }
+    h1 {
+      text-align: center;
+      color: #2b6cb0;
+      margin-bottom: 1rem;
+    }
     #searchInput {
-      width: 100%; padding: 0.6rem; font-size: 1rem;
-      margin: 1rem 0; border: 1px solid #ccc; border-radius: 6px;
+      width: 100%;
+      padding: 0.6rem;
+      font-size: 1rem;
+      margin: 1rem 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
     }
     .row {
       display: flex;
@@ -27,31 +35,57 @@
       flex-wrap: nowrap;
     }
     .video-column {
-      flex: 2 1 60%; min-width: 300px;
+      flex: 2 1 60%;
+      min-width: 300px;
     }
     .feature-column {
-      flex: 1 1 40%; min-width: 300px;
+      flex: 1 1 40%;
+      min-width: 300px;
     }
     iframe {
-      width: 100%; height: 500px; border: none; border-radius: 10px;
+      width: 100%;
+      height: 500px;
+      border: none;
+      border-radius: 10px;
     }
     .card {
-      background: #fff; padding: 1rem; border-radius: 8px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem;
+      background: #fff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 1.5rem;
     }
-    .card h3 { margin-bottom: 0.8rem; color: #2b6cb0; }
-    .feature { margin: 0.4rem 0; }
+    .card h3 {
+      margin-bottom: 0.8rem;
+      color: #2b6cb0;
+    }
+    .feature {
+      margin: 0.4rem 0;
+    }
+
+
     .nav-btns {
-      display: flex; justify-content: space-between; margin-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1rem;
     }
     .nav-btns button {
-      background: #2b6cb0; color: white; border: none;
-      padding: 0.6rem 1.2rem; border-radius: 6px;
-      font-weight: bold; cursor: pointer;
+      background: #2b6cb0;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
     }
-    .nav-btns button:disabled { background: #ccc; cursor: not-allowed; }
-    .progress, #summaryCount {
-      text-align: center; font-weight: bold; margin-top: 1rem;
+    .nav-btns button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .progress {
+      text-align: center;
+      font-weight: bold;
+      margin-top: 1rem;
     }
     .transcript-toggle {
       background: #edf2f7;
@@ -75,17 +109,17 @@
       border-radius: 6px;
       cursor: pointer;
     }
-    #toggleONP {
-      margin: 1rem auto;
-      display: block;
-      background: #4a5568;
-      color: #fff;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
+
+
+
+
+
+
+
+
+
+
+
     .tag-pill {
       display: inline-block;
       font-size: 0.85rem;
@@ -97,7 +131,7 @@
     .tag-foreign { background-color: #bee3f8; color: #2a4365; }
     .tag-positive { background-color: #fbb6ce; color: #521b41; }
     .tag-negative { background-color: #feb2b2; color: #742a2a; }
-    .tag-neutral  { background-color: #e9d8fd; color: #44337a; }
+    .tag-neutral { background-color: #e9d8fd; color: #44337a; }
 
     .card-pair {
       display: flex;
@@ -113,22 +147,22 @@
 <body>
   <h1>📊 TikTok Addictive Behavior Dashboard</h1>
   <input type="text" id="searchInput" placeholder="🔍 Search by filename or keyword..." />
-  <button id="toggleONP" onclick="toggleONPFilter()">🎯 Currently Showing: Only ONP-Related Summaries</button>
+
   <div class="progress" id="progressCounter">Loading...</div>
-  <div id="summaryCount"></div>
+
   <div class="row" id="videoFeatureLayout">Loading viewer...</div>
 
 <script>
 let videoData = [];
 let transcriptData = {};
 let translatedTranscriptData = {};
-let summaryData = {};
-let summaryRawData = {};
+
+
 let filteredData = [];
 let currentIndex = 0;
 let lastQuery = "";
 let showingTranslation = false;
-let onpFilterOnly = true;
+
 
 function tf(val) {
   const v = String(val || "").trim().toLowerCase();
@@ -155,10 +189,10 @@ function matchTranscript(videoRow) {
   return transcriptData[filename] || "Transcript not available.";
 }
 
-function matchSummary(videoRow) {
-  const filename = (videoRow["Video_File"] || "").replace(".mp4", "").trim();
-  return summaryData[filename] || "No summary available.";
-}
+
+
+
+
 
 function formatValue(val, unit = "", decimals = 1) {
   if (val === undefined || val === null || val === "") return "N/A";
@@ -171,27 +205,59 @@ function toggleTranslation() {
   showVideo(currentIndex);
 }
 
-function toggleONPFilter() {
-  onpFilterOnly = !onpFilterOnly;
-  document.getElementById("toggleONP").innerText = onpFilterOnly
-    ? "🎯 Currently Showing: Only ONP-Related Summaries"
-    : "📜 Currently Showing: All Meaningful Summaries";
-  loadMainCSV();
-}
+
+
+
+
+
+
+
 
 function showVideo(index) {
   const video = filteredData[index];
   if (!video) return;
+
   const layout = document.getElementById("videoFeatureLayout");
   const progress = document.getElementById("progressCounter");
   const videoId = extractVideoIdFromUrl(video.URL || video.url || video.video_url || "");
   const embedUrl = videoId ? `https://www.tiktok.com/embed/v2/${videoId}` : "";
   const transcriptText = highlightTranscript(matchTranscript(video), lastQuery);
-  const summaryText = matchSummary(video);
+
 
   progress.textContent = `Video ${index + 1} of ${filteredData.length}`;
 
-  layout.innerHTML = `
+  const annotationKeys = [
+    { label: "Package", key: "Package" },
+    { label: "Pouch", key: "Pouch" },
+    { label: "ONP Use", key: "ONP_use" },
+    { label: "Brand ZYN", key: "Brand_ZYN" },
+    { label: "Brand Velo", key: "Brand_Velo" },
+    { label: "Brand Iceberg", key: "Brand_Iceberg" },
+    { label: "Vapes", key: "Vapes" },
+    { label: "Misinformation", key: "Misinformation" },
+    { label: "Entertaining", key: "VT_Entertaining" },
+    { label: "Anti-ONP", key: "VT_Anti_ONP" },
+    { label: "Quit with ONP", key: "VT_Quit_with_ONP" },
+    { label: "ONP + Sport", key: "VT_ONP_Sport" },
+    { label: "Human Subjects", key: "human_subjects" },
+    { label: "Ethnic Minority", key: "ethnic_minority" },
+    { label: "YA (Young Adult 21-30)", key: "YA(Young Adult 21-30)" }
+  ];
+
+  const sentimentTags = `
+    ${tf(video.Foreign_language) === "Yes" ? '<span class="tag-pill tag-foreign">🌐 Foreign Language</span>' : ""}
+    ${tf(video.Positive) === "Yes" ? '<span class="tag-pill tag-positive">😊 Positive</span>' : ""}
+    ${tf(video.Negative) === "Yes" ? '<span class="tag-pill tag-negative">😠 Negative</span>' : ""}
+    ${tf(video.Neutral) === "Yes" ? '<span class="tag-pill tag-neutral">😐 Neutral</span>' : ""}
+  `;
+
+  const annotationsHTML = annotationKeys.map(item => {
+    const rawValue = video[item.key];
+    const value = tf(rawValue);
+    return `<div class="feature"><b>${item.label}:</b> ${value}</div>`;
+  }).join("");
+
+  const layoutHTML = `
     <div class="video-column">
       <iframe src="${embedUrl}" allowfullscreen></iframe>
       <div class="nav-btns">
@@ -201,32 +267,69 @@ function showVideo(index) {
       <button id="translateBtn" onclick="toggleTranslation()">
         ${showingTranslation ? "🌐 Show Original Transcript" : "🌐 Translate to English"}
       </button>
+      <div class="transcript-toggle">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong>📝 Transcript (${showingTranslation ? "English" : "Original"})</strong>
+          <div>${sentimentTags}</div>
+        </div>
+        <div style="margin-top: 0.6rem;">${transcriptText}</div>
+      </div>
+
       <div class="card-pair">
         <div class="card card-half">
-          <h3>📝 Transcript (${showingTranslation ? "English" : "Original"})</h3>
-          <div>${transcriptText}</div>
+          <h3>⏱️ Temporal Dynamics</h3>
+          <div class="feature"><b>Duration:</b> ${formatValue(video.Duration, "seconds")}</div>
+          <div class="feature"><b>Scene Cuts:</b> ${formatValue(video.Scene_Cuts, "cuts", 0)}</div>
+          <div class="feature"><b>Mean Frame Duration:</b> ${formatValue(video.Mean_Frame_Duration, "seconds")}</div>
+          <div class="feature"><b>Frame Duration Std:</b> ${formatValue(video.Frame_Duration_Std, "seconds")}</div>
+          <div class="feature"><b>Min Frame Duration:</b> ${formatValue(video.Min_Frame_Duration, "seconds")}</div>
+          <div class="feature"><b>Max Frame Duration:</b> ${formatValue(video.Max_Frame_Duration, "seconds")}</div>
         </div>
+
         <div class="card card-half">
-          <h3>🧾 Gemini Summary</h3>
-          <div>${summaryText}</div>
+          <h3>🔊 Audio Complexity</h3>
+          <div class="feature"><b>Volume Range:</b> ${formatValue(video.Volume_Range, "dB")}</div>
+          <div class="feature"><b>Speech Detected (AST):</b> ${tf(video.Speech_Detected_AST)}</div>
+        </div>
+      </div>
+
+      <div class="card-pair">
+        <div class="card card-half">
+          <h3>🎥 Motion Analysis</h3>
+          <div class="feature"><b>Avg Motion Magnitude:</b> ${formatValue(video.Avg_Motion_Magnitude)}</div>
+          <div class="feature"><b>Avg Vector Count:</b> ${formatValue(video.Avg_Vector_Count, "vectors", 0)}</div>
+        </div>
+
+        <div class="card card-half">
+          <h3>🧠 Multimodal Characteristics</h3>
+          <div class="feature"><b>Animated Text:</b> ${tf(video.Animated_Text)}</div>
         </div>
       </div>
     </div>
+
     <div class="feature-column">
-      <div class="card"><h3>🏷️ Annotations</h3>${Object.entries(video).map(([key, value]) =>
-        key.startsWith("VT_") || key === "ONP_use" || key === "Pouch" || key === "Package"
-          ? `<div class="feature"><b>${key}:</b> ${tf(value)}</div>` : ""
-      ).join("")}</div>
+      <div class="card">
+        <h3>🏷️ Annotation Tags</h3>
+        ${annotationsHTML}
+      </div>
     </div>
   `;
+
+  layout.innerHTML = layoutHTML;
   updateButtons();
 }
 
 function goPrev() {
-  if (currentIndex > 0) { currentIndex--; showVideo(currentIndex); }
+  if (currentIndex > 0) {
+    currentIndex--;
+    showVideo(currentIndex);
+  }
 }
 function goNext() {
-  if (currentIndex < filteredData.length - 1) { currentIndex++; showVideo(currentIndex); }
+  if (currentIndex < filteredData.length - 1) {
+    currentIndex++;
+    showVideo(currentIndex);
+  }
 }
 function updateButtons() {
   document.getElementById("prevBtn").disabled = currentIndex === 0;
@@ -236,12 +339,13 @@ function applySearch() {
   const query = document.getElementById("searchInput").value.toLowerCase();
   lastQuery = query;
   filteredData = videoData.filter(v => {
-    const base = (v.Video_File || "").replace(".mp4", "").trim();
-    const summary = summaryData[base] || "";
     const fileMatch = (v.Video_File || "").toLowerCase().includes(query);
+    const base = (v.Video_File || "").replace(".mp4", "").trim();
+
+
     const original = transcriptData[base] || "";
     const translated = translatedTranscriptData[base] || "";
-    return fileMatch || original.toLowerCase().includes(query) || translated.toLowerCase().includes(query) || summary.toLowerCase().includes(query);
+    return fileMatch || original.toLowerCase().includes(query) || translated.toLowerCase().includes(query);
   });
   currentIndex = 0;
   showVideo(currentIndex);
@@ -262,29 +366,29 @@ function loadTranscriptCSV() {
               translatedTranscriptData[base] = row["translated_transcript"] || "";
             }
           });
-          loadSummaryCSV();
-        }
-      });
-    });
-}
 
-function loadSummaryCSV() {
-  fetch("video_metadata_with_summaries.csv")
-    .then(res => res.text())
-    .then(csv => {
-      Papa.parse(csv, {
-        header: true,
-        skipEmptyLines: true,
-        complete: results => {
-          summaryRawData = {};
-          results.data.forEach(row => {
-            const base = row["Video_File"]?.replace(".mp4", "").trim();
-            const summary = (row["Summary"] || "").trim();
-            const valid = summary && !/no summary|summary failed/i.test(summary);
-            if (valid && base) {
-              summaryRawData[base] = summary;
-            }
-          });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
           loadMainCSV();
         }
       });
@@ -299,25 +403,25 @@ function loadMainCSV() {
         header: true,
         skipEmptyLines: true,
         complete: results => {
-          summaryData = {};
-          results.data.forEach(row => {
-            const base = (row.Video_File || "").replace(".mp4", "").trim();
-            const summary = summaryRawData[base] || "";
-            if (!summary) return;
-            const isONP = /onp|zyn|pouch|nicotine/i.test(summary);
-            if ((onpFilterOnly && isONP) || (!onpFilterOnly)) {
-              summaryData[base] = summary;
-            }
-          });
+          videoData = results.data;
 
-          videoData = results.data.filter(v => {
-            const base = (v.Video_File || "").replace(".mp4", "").trim();
-            return summaryData.hasOwnProperty(base);
-          });
+
+
+
+
+
+
+
+
+
+
+
+
+
 
           filteredData = [...videoData];
-          document.getElementById("summaryCount").textContent = `Showing ${filteredData.length} video(s)`;
-          currentIndex = 0;
+
+
           showVideo(currentIndex);
         }
       });
