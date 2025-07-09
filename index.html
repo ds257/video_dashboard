@@ -199,6 +199,37 @@ function toggleTranslation() {
   showVideo(currentIndex);
 }
 
+const groupedAnnotations = {
+  "📦 ONP Product Presence": ["Package", "Pouch", "ONP_use"],
+  "🏷️ Brand Mentions": ["Brand_ZYN", "Brand_Velo", "Brand_Iceberg"],
+  "🚬 Substances": ["Vapes", "Misinformation"],
+  "🎭 Video Type / Theme": ["VT_Entertaining", "VT_Anti_ONP", "VT_Quit_with_ONP", "VT_ONP_Sport"],
+  "👤 Demographics": ["human_subjects", "ethnic_minority", "YA(Young Adult 21-30)"]
+};
+
+function renderGroupedAnnotations(video) {
+  let html = "";
+  for (const [group, keys] of Object.entries(groupedAnnotations)) {
+    html += `<h4 style="margin-top: 1rem; color: #2b6cb0;">${group}</h4>`;
+    keys.forEach(key => {
+      const rawValue = video[key];
+      const value = tf(rawValue);
+      const label = key
+        .replace(/_/g, " ")
+        .replace("ONP use", "ONP Use")
+        .replace("Brand ZYN", "Brand ZYN")
+        .replace("Brand Velo", "Brand Velo")
+        .replace("Brand Iceberg", "Brand Iceberg")
+        .replace("YA\\(Young Adult 21-30\\)", "YA (Young Adult 21–30)")
+        .replace("VT ", "")
+        .replace("human subjects", "Human Subjects")
+        .replace("ethnic minority", "Ethnic Minority");
+      html += `<div class="feature"><b>${label}:</b> ${value}</div>`;
+    });
+  }
+  return html;
+}
+
 function showVideo(index) {
   const video = filteredData[index];
   if (!video) return;
@@ -220,24 +251,6 @@ function showVideo(index) {
        </div>`
     : "";
 
-  const annotationKeys = [
-    { label: "Package", key: "Package" },
-    { label: "Pouch", key: "Pouch" },
-    { label: "ONP Use", key: "ONP_use" },
-    { label: "Brand ZYN", key: "Brand_ZYN" },
-    { label: "Brand Velo", key: "Brand_Velo" },
-    { label: "Brand Iceberg", key: "Brand_Iceberg" },
-    { label: "Vapes", key: "Vapes" },
-    { label: "Misinformation", key: "Misinformation" },
-    { label: "Entertaining", key: "VT_Entertaining" },
-    { label: "Anti-ONP", key: "VT_Anti_ONP" },
-    { label: "Quit with ONP", key: "VT_Quit_with_ONP" },
-    { label: "ONP + Sport", key: "VT_ONP_Sport" },
-    { label: "Human Subjects", key: "human_subjects" },
-    { label: "Ethnic Minority", key: "ethnic_minority" },
-    { label: "YA (Young Adult 21-30)", key: "YA(Young Adult 21-30)" }
-  ];
-
   const sentimentTags = `
     ${tf(video.Foreign_language) === "Yes" ? '<span class="tag-pill tag-foreign">🌐 Foreign Language</span>' : ""}
     ${tf(video.Positive) === "Yes" ? '<span class="tag-pill tag-positive">😊 Positive</span>' : ""}
@@ -245,11 +258,7 @@ function showVideo(index) {
     ${tf(video.Neutral) === "Yes" ? '<span class="tag-pill tag-neutral">😐 Neutral</span>' : ""}
   `;
 
-  const annotationsHTML = annotationKeys.map(item => {
-    const rawValue = video[item.key];
-    const value = tf(rawValue);
-    return `<div class="feature"><b>${item.label}:</b> ${value}</div>`;
-  }).join("");
+  const annotationsHTML = renderGroupedAnnotations(video);
 
   const layoutHTML = `
     <div class="video-column">
@@ -316,14 +325,12 @@ function goPrev() {
     showVideo(currentIndex);
   }
 }
-
 function goNext() {
   if (currentIndex < filteredData.length - 1) {
     currentIndex++;
     showVideo(currentIndex);
   }
 }
-
 function updateButtons() {
   document.getElementById("prevBtn").disabled = currentIndex === 0;
   document.getElementById("nextBtn").disabled = currentIndex === filteredData.length - 1;
@@ -331,7 +338,7 @@ function updateButtons() {
 
 function applySearch() {
   const query = document.getElementById("searchInput").value.toLowerCase();
-  const summaryFilter = document.getElementById("summaryToggle").checked;
+  const summaryFilter = document.getElementById("summaryToggle")?.checked;
   lastQuery = query;
 
   filteredData = videoData.filter(v => {
@@ -340,10 +347,8 @@ function applySearch() {
     const original = transcriptData[base] || "";
     const translated = translatedTranscriptData[base] || "";
     const summaryExists = !!geminiSummaryMap[base];
-
     const matchQuery = fileMatch || original.toLowerCase().includes(query) || translated.toLowerCase().includes(query);
     const matchSummary = summaryFilter ? summaryExists : true;
-
     return matchQuery && matchSummary;
   });
 
