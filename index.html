@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="="en">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>TikTok Addictive Behavior Dashboard</title>
@@ -67,6 +67,16 @@
       background-color: #facc15;
       padding: 0 2px;
     }
+    #translateBtn {
+      margin-top: 1rem;
+      padding: 0.5rem 1rem;
+      background: #ecc94b;
+      color: black;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -78,9 +88,11 @@
 <script>
 let videoData = [];
 let transcriptData = {};
+let translatedTranscriptData = {};
 let filteredData = [];
 let currentIndex = 0;
 let lastQuery = "";
+let showingTranslation = false;
 
 function tf(val) {
   const v = String(val || "").trim().toLowerCase();
@@ -101,6 +113,9 @@ function highlightTranscript(text, query) {
 
 function matchTranscript(videoRow) {
   const filename = (videoRow["Video_File"] || "").replace(".mp4", "").trim();
+  if (showingTranslation && translatedTranscriptData[filename]) {
+    return translatedTranscriptData[filename];
+  }
   return transcriptData[filename] || "Transcript not available.";
 }
 
@@ -108,6 +123,11 @@ function formatValue(val, unit = "", decimals = 1) {
   if (val === undefined || val === null || val === "") return "N/A";
   const num = parseFloat(val);
   return isNaN(num) ? val : `${num.toFixed(decimals)}${unit ? " " + unit : ""}`;
+}
+
+function toggleTranslation() {
+  showingTranslation = !showingTranslation;
+  showVideo(currentIndex);
 }
 
 function showVideo(index) {
@@ -172,17 +192,20 @@ function showVideo(index) {
         <button onclick="goPrev()" id="prevBtn">⬅️ Previous</button>
         <button onclick="goNext()" id="nextBtn">Next ➡️</button>
       </div>
+      <button id="translateBtn" onclick="toggleTranslation()">
+        ${showingTranslation ? "🌐 Show Original Transcript" : "🌐 Translate to English"}
+      </button>
       <details class="transcript-toggle" open>
-        <summary>📝 Transcript (click to collapse)</summary>
+        <summary>📝 Transcript (${showingTranslation ? "English" : "Original"})</summary>
         <div>${transcriptText}</div>
       </details>
+      ${temporal + audio + motion}
     </div>
     <div class="feature-column">
       <div class="card">
         <h3>🏷️ Annotation Tags</h3>
         ${annotationsHTML}
       </div>
-      ${temporal + audio + motion}
     </div>
   `;
 
@@ -210,28 +233,13 @@ function applySearch() {
   lastQuery = query;
   filteredData = videoData.filter(v => {
     const fileMatch = (v.Video_File || "").toLowerCase().includes(query);
-    const transcript = transcriptData[(v.Video_File || "").replace(".mp4", "").trim()] || "";
-    const transcriptMatch = transcript.toLowerCase().includes(query);
-    return fileMatch || transcriptMatch;
+    const base = (v.Video_File || "").replace(".mp4", "").trim();
+    const original = transcriptData[base] || "";
+    const translated = translatedTranscriptData[base] || "";
+    return fileMatch || original.toLowerCase().includes(query) || translated.toLowerCase().includes(query);
   });
   currentIndex = 0;
   showVideo(currentIndex);
-}
-
-function loadMainCSV() {
-  fetch("TikTok_Dataset_with_Correct_Ground_Truth_Matching.csv")
-    .then(res => res.text())
-    .then(csv => {
-      Papa.parse(csv, {
-        header: true,
-        skipEmptyLines: true,
-        complete: results => {
-          videoData = results.data;
-          filteredData = [...videoData];
-          showVideo(currentIndex);
-        }
-      });
-    });
 }
 
 function loadTranscriptCSV() {
@@ -248,7 +256,43 @@ function loadTranscriptCSV() {
               transcriptData[base] = row["Transcript"];
             }
           });
+          loadTranslatedTranscriptCSV();
+        }
+      });
+    });
+}
+
+function loadTranslatedTranscriptCSV() {
+  fetch("video_metadata_whisper_translated.csv")
+    .then(res => res.text())
+    .then(csv => {
+      Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: results => {
+          results.data.forEach(row => {
+            if (row["Video_File"] && row["Translated_Transcript"]) {
+              const base = row["Video_File"].replace(".mp4", "").trim();
+              translatedTranscriptData[base] = row["Translated_Transcript"];
+            }
+          });
           loadMainCSV();
+        }
+      });
+    });
+}
+
+function loadMainCSV() {
+  fetch("TikTok_Dataset_with_Correct_Ground_Truth_Matching.csv")
+    .then(res => res.text())
+    .then(csv => {
+      Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: results => {
+          videoData = results.data;
+          filteredData = [...videoData];
+          showVideo(currentIndex);
         }
       });
     });
