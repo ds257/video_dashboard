@@ -59,10 +59,6 @@
       font-size: 0.95rem;
       line-height: 1.4;
     }
-    .transcript-toggle summary {
-      font-weight: bold;
-      cursor: pointer;
-    }
     mark {
       background-color: #facc15;
       padding: 0 2px;
@@ -76,6 +72,30 @@
       border: none;
       border-radius: 6px;
       cursor: pointer;
+    }
+    .tag-pill {
+      display: inline-block;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 9999px;
+      margin: 0.2rem 0.3rem;
+      font-weight: 500;
+    }
+    .tag-foreign {
+      background-color: #bee3f8;
+      color: #2a4365;
+    }
+    .tag-positive {
+      background-color: #fbb6ce;
+      color: #521b41;
+    }
+    .tag-negative {
+      background-color: #feb2b2;
+      color: #742a2a;
+    }
+    .tag-neutral {
+      background-color: #e9d8fd;
+      color: #44337a;
     }
   </style>
 </head>
@@ -160,6 +180,13 @@ function showVideo(index) {
     { label: "YA (Young Adult 21-30)", key: "YA(Young Adult 21-30)" }
   ];
 
+  const sentimentTags = `
+    ${tf(video.Foreign_Language) === "Yes" ? '<span class="tag-pill tag-foreign">🌐 Foreign Language</span>' : ""}
+    ${tf(video.Sentiment_Pos) === "Yes" ? '<span class="tag-pill tag-positive">😊 Positive</span>' : ""}
+    ${tf(video.Sentiment_Neg) === "Yes" ? '<span class="tag-pill tag-negative">😠 Negative</span>' : ""}
+    ${tf(video.Sentiment_Neutral) === "Yes" ? '<span class="tag-pill tag-neutral">😐 Neutral</span>' : ""}
+  `;
+
   const annotationsHTML = annotationKeys.map(item => {
     const rawValue = video[item.key];
     const value = tf(rawValue);
@@ -202,10 +229,13 @@ function showVideo(index) {
       <button id="translateBtn" onclick="toggleTranslation()">
         ${showingTranslation ? "🌐 Show Original Transcript" : "🌐 Translate to English"}
       </button>
-      <details class="transcript-toggle" open>
-        <summary>📝 Transcript (${showingTranslation ? "English" : "Original"})</summary>
-        <div>${transcriptText}</div>
-      </details>
+      <div class="transcript-toggle">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <strong>📝 Transcript (${showingTranslation ? "English" : "Original"})</strong>
+          <div>${sentimentTags}</div>
+        </div>
+        <div style="margin-top: 0.6rem;">${transcriptText}</div>
+      </div>
       ${temporal + audio + motion}
     </div>
     <div class="feature-column">
