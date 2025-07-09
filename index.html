@@ -212,7 +212,13 @@ function showVideo(index) {
   progress.textContent = `Video ${index + 1} of ${filteredData.length}`;
 
   const baseFile = (video.Video_File || "").replace(".mp4", "").trim();
-  const geminiSummary = geminiSummaryMap[baseFile] || "No Gemini summary available.";
+  const geminiSummary = geminiSummaryMap[baseFile];
+  const geminiSummaryCard = geminiSummary
+    ? `<div class="card">
+         <h3>🧠 Gemini Summary</h3>
+         <div>${geminiSummary}</div>
+       </div>`
+    : "";
 
   const annotationKeys = [
     { label: "Package", key: "Package" },
@@ -300,10 +306,7 @@ function showVideo(index) {
         <h3>🏷️ Annotation Tags</h3>
         ${annotationsHTML}
       </div>
-      <div class="card">
-        <h3>🧠 Gemini Summary</h3>
-        <div>${geminiSummary}</div>
-      </div>
+      ${geminiSummaryCard}
     </div>
   `;
 
