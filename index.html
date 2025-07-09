@@ -181,11 +181,12 @@ function showVideo(index) {
   ];
 
   const sentimentTags = `
-    ${tf(video.Foreign_Language) === "Yes" ? '<span class="tag-pill tag-foreign">🌐 Foreign Language</span>' : ""}
-    ${tf(video.Sentiment_Pos) === "Yes" ? '<span class="tag-pill tag-positive">😊 Positive</span>' : ""}
-    ${tf(video.Sentiment_Neg) === "Yes" ? '<span class="tag-pill tag-negative">😠 Negative</span>' : ""}
-    ${tf(video.Sentiment_Neutral) === "Yes" ? '<span class="tag-pill tag-neutral">😐 Neutral</span>' : ""}
-  `;
+  ${tf(video.Foreign_language) === "Yes" ? '<span class="tag-pill tag-foreign">🌐 Foreign Language</span>' : ""}
+  ${tf(video.Positive) === "Yes" ? '<span class="tag-pill tag-positive">😊 Positive</span>' : ""}
+  ${tf(video.Negative) === "Yes" ? '<span class="tag-pill tag-negative">😠 Negative</span>' : ""}
+  ${tf(video.Neutral) === "Yes" ? '<span class="tag-pill tag-neutral">😐 Neutral</span>' : ""}
+`;
+
 
   const annotationsHTML = annotationKeys.map(item => {
     const rawValue = video[item.key];
