@@ -273,7 +273,7 @@ function loadTranslatedTranscriptCSV() {
           results.data.forEach(row => {
             if (row["Video_File"] && row["Translated_Transcript"]) {
               const base = row["Video_File"].replace(".mp4", "").trim();
-              translatedTranscriptData[base] = row["Translated_Transcript"];
+              translatedTranscriptData[base] = row["translated_transcript"];
             }
           });
           loadMainCSV();
