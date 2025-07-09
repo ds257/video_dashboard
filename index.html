@@ -243,26 +243,6 @@ function applySearch() {
 }
 
 function loadTranscriptCSV() {
-  fetch("video_metadata_whisper.csv")
-    .then(res => res.text())
-    .then(csv => {
-      Papa.parse(csv, {
-        header: true,
-        skipEmptyLines: true,
-        complete: results => {
-          results.data.forEach(row => {
-            if (row["Video_File"] && row["Transcript"]) {
-              const base = row["Video_File"].replace(".mp4", "").trim();
-              transcriptData[base] = row["Transcript"];
-            }
-          });
-          loadTranslatedTranscriptCSV();
-        }
-      });
-    });
-}
-
-function loadTranslatedTranscriptCSV() {
   fetch("video_metadata_whisper_translated.csv")
     .then(res => res.text())
     .then(csv => {
@@ -271,9 +251,10 @@ function loadTranslatedTranscriptCSV() {
         skipEmptyLines: true,
         complete: results => {
           results.data.forEach(row => {
-            if (row["Video_File"] && row["Translated_Transcript"]) {
-              const base = row["Video_File"].replace(".mp4", "").trim();
-              translatedTranscriptData[base] = row["translated_transcript"];
+            const base = row["Video_File"]?.replace(".mp4", "").trim();
+            if (base) {
+              transcriptData[base] = row["Transcript"] || "";
+              translatedTranscriptData[base] = row["translated_transcript"] || "";
             }
           });
           loadMainCSV();
