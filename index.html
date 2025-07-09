@@ -281,22 +281,9 @@ function showVideo(index) {
         </div>
 
         <div class="card card-half">
-          <h3>🔊 Audio Complexity</h3>
-          <div class="feature"><b>Volume Range:</b> ${formatValue(video.Volume_Range, "dB")}</div>
-          <div class="feature"><b>Speech Detected (AST):</b> ${tf(video.Speech_Detected_AST)}</div>
-        </div>
-      </div>
-
-      <div class="card-pair">
-        <div class="card card-half">
           <h3>🎥 Motion Analysis</h3>
           <div class="feature"><b>Avg Motion Magnitude:</b> ${formatValue(video.Avg_Motion_Magnitude)}</div>
           <div class="feature"><b>Avg Vector Count:</b> ${formatValue(video.Avg_Vector_Count, "vectors", 0)}</div>
-        </div>
-
-        <div class="card card-half">
-          <h3>🧠 Multimodal Characteristics</h3>
-          <div class="feature"><b>Animated Text:</b> ${tf(video.Animated_Text)}</div>
         </div>
       </div>
     </div>
@@ -307,6 +294,15 @@ function showVideo(index) {
         ${annotationsHTML}
       </div>
       ${geminiSummaryCard}
+      <div class="card">
+        <h3>🔊 Audio Complexity</h3>
+        <div class="feature"><b>Volume Range:</b> ${formatValue(video.Volume_Range, "dB")}</div>
+        <div class="feature"><b>Speech Detected (AST):</b> ${tf(video.Speech_Detected_AST)}</div>
+      </div>
+      <div class="card">
+        <h3>🧠 Multimodal Characteristics</h3>
+        <div class="feature"><b>Animated Text:</b> ${tf(video.Animated_Text)}</div>
+      </div>
     </div>
   `;
 
@@ -320,26 +316,37 @@ function goPrev() {
     showVideo(currentIndex);
   }
 }
+
 function goNext() {
   if (currentIndex < filteredData.length - 1) {
     currentIndex++;
     showVideo(currentIndex);
   }
 }
+
 function updateButtons() {
   document.getElementById("prevBtn").disabled = currentIndex === 0;
   document.getElementById("nextBtn").disabled = currentIndex === filteredData.length - 1;
 }
+
 function applySearch() {
   const query = document.getElementById("searchInput").value.toLowerCase();
+  const summaryFilter = document.getElementById("summaryToggle").checked;
   lastQuery = query;
+
   filteredData = videoData.filter(v => {
     const fileMatch = (v.Video_File || "").toLowerCase().includes(query);
     const base = (v.Video_File || "").replace(".mp4", "").trim();
     const original = transcriptData[base] || "";
     const translated = translatedTranscriptData[base] || "";
-    return fileMatch || original.toLowerCase().includes(query) || translated.toLowerCase().includes(query);
+    const summaryExists = !!geminiSummaryMap[base];
+
+    const matchQuery = fileMatch || original.toLowerCase().includes(query) || translated.toLowerCase().includes(query);
+    const matchSummary = summaryFilter ? summaryExists : true;
+
+    return matchQuery && matchSummary;
   });
+
   currentIndex = 0;
   showVideo(currentIndex);
 }
