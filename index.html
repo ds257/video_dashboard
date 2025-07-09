@@ -156,13 +156,12 @@
 let videoData = [];
 let transcriptData = {};
 let translatedTranscriptData = {};
-
+let geminiSummaryMap = {};
 
 let filteredData = [];
 let currentIndex = 0;
 let lastQuery = "";
 let showingTranslation = false;
-
 
 function tf(val) {
   const v = String(val || "").trim().toLowerCase();
@@ -189,11 +188,6 @@ function matchTranscript(videoRow) {
   return transcriptData[filename] || "Transcript not available.";
 }
 
-
-
-
-
-
 function formatValue(val, unit = "", decimals = 1) {
   if (val === undefined || val === null || val === "") return "N/A";
   const num = parseFloat(val);
@@ -205,14 +199,6 @@ function toggleTranslation() {
   showVideo(currentIndex);
 }
 
-
-
-
-
-
-
-
-
 function showVideo(index) {
   const video = filteredData[index];
   if (!video) return;
@@ -223,8 +209,10 @@ function showVideo(index) {
   const embedUrl = videoId ? `https://www.tiktok.com/embed/v2/${videoId}` : "";
   const transcriptText = highlightTranscript(matchTranscript(video), lastQuery);
 
-
   progress.textContent = `Video ${index + 1} of ${filteredData.length}`;
+
+  const baseFile = (video.Video_File || "").replace(".mp4", "").trim();
+  const geminiSummary = geminiSummaryMap[baseFile] || "No Gemini summary available.";
 
   const annotationKeys = [
     { label: "Package", key: "Package" },
@@ -312,6 +300,10 @@ function showVideo(index) {
         <h3>🏷️ Annotation Tags</h3>
         ${annotationsHTML}
       </div>
+      <div class="card">
+        <h3>🧠 Gemini Summary</h3>
+        <div>${geminiSummary}</div>
+      </div>
     </div>
   `;
 
@@ -341,8 +333,6 @@ function applySearch() {
   filteredData = videoData.filter(v => {
     const fileMatch = (v.Video_File || "").toLowerCase().includes(query);
     const base = (v.Video_File || "").replace(".mp4", "").trim();
-
-
     const original = transcriptData[base] || "";
     const translated = translatedTranscriptData[base] || "";
     return fileMatch || original.toLowerCase().includes(query) || translated.toLowerCase().includes(query);
@@ -366,29 +356,26 @@ function loadTranscriptCSV() {
               translatedTranscriptData[base] = row["translated_transcript"] || "";
             }
           });
+          loadGeminiCSV();
+        }
+      });
+    });
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function loadGeminiCSV() {
+  fetch("Filtered_Gemini_Summaries.csv")
+    .then(res => res.text())
+    .then(csv => {
+      Papa.parse(csv, {
+        header: true,
+        skipEmptyLines: true,
+        complete: results => {
+          results.data.forEach(row => {
+            const base = row["Video_File"]?.replace(".mp4", "").trim();
+            if (base && row["Clean_Gemini_Summary"]) {
+              geminiSummaryMap[base] = row["Clean_Gemini_Summary"];
+            }
+          });
           loadMainCSV();
         }
       });
@@ -404,24 +391,7 @@ function loadMainCSV() {
         skipEmptyLines: true,
         complete: results => {
           videoData = results.data;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
           filteredData = [...videoData];
-
-
           showVideo(currentIndex);
         }
       });
@@ -433,5 +403,3 @@ window.onload = () => {
   document.getElementById("searchInput").addEventListener("input", applySearch);
 };
 </script>
-</body>
-</html>
