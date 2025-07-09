@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="="en">
 <head>
   <meta charset="UTF-8" />
   <title>TikTok Addictive Behavior Dashboard</title>
@@ -104,6 +104,12 @@ function matchTranscript(videoRow) {
   return transcriptData[filename] || "Transcript not available.";
 }
 
+function formatValue(val, unit = "", decimals = 1) {
+  if (val === undefined || val === null || val === "") return "N/A";
+  const num = parseFloat(val);
+  return isNaN(num) ? val : `${num.toFixed(decimals)}${unit ? " " + unit : ""}`;
+}
+
 function showVideo(index) {
   const video = filteredData[index];
   if (!video) return;
@@ -136,25 +142,25 @@ function showVideo(index) {
   const temporal = `
     <div class="card">
       <h3>⏱️ Temporal Dynamics</h3>
-      <div class="feature"><b>Duration:</b> ${video.Duration}</div>
-      <div class="feature"><b>Scene Cuts:</b> ${video.Scene_Cuts}</div>
-      <div class="feature"><b>Mean Frame Duration:</b> ${video.Mean_Frame_Duration}</div>
-      <div class="feature"><b>Frame Duration Std:</b> ${video.Frame_Duration_Std}</div>
-      <div class="feature"><b>Min Frame Duration:</b> ${video.Min_Frame_Duration}</div>
-      <div class="feature"><b>Max Frame Duration:</b> ${video.Max_Frame_Duration}</div>
+      <div class="feature"><b>Duration:</b> ${formatValue(video.Duration, "seconds")}</div>
+      <div class="feature"><b>Scene Cuts:</b> ${formatValue(video.Scene_Cuts, "cuts", 0)}</div>
+      <div class="feature"><b>Mean Frame Duration:</b> ${formatValue(video.Mean_Frame_Duration, "seconds")}</div>
+      <div class="feature"><b>Frame Duration Std:</b> ${formatValue(video.Frame_Duration_Std, "seconds")}</div>
+      <div class="feature"><b>Min Frame Duration:</b> ${formatValue(video.Min_Frame_Duration, "seconds")}</div>
+      <div class="feature"><b>Max Frame Duration:</b> ${formatValue(video.Max_Frame_Duration, "seconds")}</div>
     </div>`;
 
   const audio = `
     <div class="card">
       <h3>🔊 Audio Complexity</h3>
-      <div class="feature"><b>Volume Range:</b> ${video.Volume_Range}</div>
+      <div class="feature"><b>Volume Range:</b> ${formatValue(video.Volume_Range, "dB")}</div>
     </div>`;
 
   const motion = `
     <div class="card">
       <h3>🎥 Motion Analysis</h3>
-      <div class="feature"><b>Avg Motion Magnitude:</b> ${video.Avg_Motion_Magnitude}</div>
-      <div class="feature"><b>Avg Vector Count:</b> ${video.Avg_Vector_Count}</div>
+      <div class="feature"><b>Avg Motion Magnitude:</b> ${formatValue(video.Avg_Motion_Magnitude)}</div>
+      <div class="feature"><b>Avg Vector Count:</b> ${formatValue(video.Avg_Vector_Count, "vectors", 0)}</div>
       <div class="feature"><b>Animated Text:</b> ${tf(video.Animated_Text)}</div>
       <div class="feature"><b>Speech Detected (AST):</b> ${tf(video.Speech_Detected_AST)}</div>
     </div>`;
