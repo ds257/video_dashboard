@@ -81,21 +81,18 @@
       margin: 0.2rem 0.3rem;
       font-weight: 500;
     }
-    .tag-foreign {
-      background-color: #bee3f8;
-      color: #2a4365;
+    .tag-foreign { background-color: #bee3f8; color: #2a4365; }
+    .tag-positive { background-color: #fbb6ce; color: #521b41; }
+    .tag-negative { background-color: #feb2b2; color: #742a2a; }
+    .tag-neutral { background-color: #e9d8fd; color: #44337a; }
+
+    .card-pair {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
     }
-    .tag-positive {
-      background-color: #fbb6ce;
-      color: #521b41;
-    }
-    .tag-negative {
-      background-color: #feb2b2;
-      color: #742a2a;
-    }
-    .tag-neutral {
-      background-color: #e9d8fd;
-      color: #44337a;
+    .card-half {
+      flex: 1 1 48%;
     }
   </style>
 </head>
@@ -181,12 +178,11 @@ function showVideo(index) {
   ];
 
   const sentimentTags = `
-  ${tf(video.Foreign_language) === "Yes" ? '<span class="tag-pill tag-foreign">🌐 Foreign Language</span>' : ""}
-  ${tf(video.Positive) === "Yes" ? '<span class="tag-pill tag-positive">😊 Positive</span>' : ""}
-  ${tf(video.Negative) === "Yes" ? '<span class="tag-pill tag-negative">😠 Negative</span>' : ""}
-  ${tf(video.Neutral) === "Yes" ? '<span class="tag-pill tag-neutral">😐 Neutral</span>' : ""}
-`;
-
+    ${tf(video.Foreign_language) === "Yes" ? '<span class="tag-pill tag-foreign">🌐 Foreign Language</span>' : ""}
+    ${tf(video.Positive) === "Yes" ? '<span class="tag-pill tag-positive">😊 Positive</span>' : ""}
+    ${tf(video.Negative) === "Yes" ? '<span class="tag-pill tag-negative">😠 Negative</span>' : ""}
+    ${tf(video.Neutral) === "Yes" ? '<span class="tag-pill tag-neutral">😐 Neutral</span>' : ""}
+  `;
 
   const annotationsHTML = annotationKeys.map(item => {
     const rawValue = video[item.key];
@@ -194,33 +190,7 @@ function showVideo(index) {
     return `<div class="feature"><b>${item.label}:</b> ${value}</div>`;
   }).join("");
 
-  const temporal = `
-    <div class="card">
-      <h3>⏱️ Temporal Dynamics</h3>
-      <div class="feature"><b>Duration:</b> ${formatValue(video.Duration, "seconds")}</div>
-      <div class="feature"><b>Scene Cuts:</b> ${formatValue(video.Scene_Cuts, "cuts", 0)}</div>
-      <div class="feature"><b>Mean Frame Duration:</b> ${formatValue(video.Mean_Frame_Duration, "seconds")}</div>
-      <div class="feature"><b>Frame Duration Std:</b> ${formatValue(video.Frame_Duration_Std, "seconds")}</div>
-      <div class="feature"><b>Min Frame Duration:</b> ${formatValue(video.Min_Frame_Duration, "seconds")}</div>
-      <div class="feature"><b>Max Frame Duration:</b> ${formatValue(video.Max_Frame_Duration, "seconds")}</div>
-    </div>`;
-
-  const audio = `
-    <div class="card">
-      <h3>🔊 Audio Complexity</h3>
-      <div class="feature"><b>Volume Range:</b> ${formatValue(video.Volume_Range, "dB")}</div>
-    </div>`;
-
-  const motion = `
-    <div class="card">
-      <h3>🎥 Motion Analysis</h3>
-      <div class="feature"><b>Avg Motion Magnitude:</b> ${formatValue(video.Avg_Motion_Magnitude)}</div>
-      <div class="feature"><b>Avg Vector Count:</b> ${formatValue(video.Avg_Vector_Count, "vectors", 0)}</div>
-      <div class="feature"><b>Animated Text:</b> ${tf(video.Animated_Text)}</div>
-      <div class="feature"><b>Speech Detected (AST):</b> ${tf(video.Speech_Detected_AST)}</div>
-    </div>`;
-
-  layout.innerHTML = `
+  const layoutHTML = `
     <div class="video-column">
       <iframe src="${embedUrl}" allowfullscreen></iframe>
       <div class="nav-btns">
@@ -237,8 +207,39 @@ function showVideo(index) {
         </div>
         <div style="margin-top: 0.6rem;">${transcriptText}</div>
       </div>
-      ${temporal + audio + motion}
+
+      <div class="card-pair">
+        <div class="card card-half">
+          <h3>⏱️ Temporal Dynamics</h3>
+          <div class="feature"><b>Duration:</b> ${formatValue(video.Duration, "seconds")}</div>
+          <div class="feature"><b>Scene Cuts:</b> ${formatValue(video.Scene_Cuts, "cuts", 0)}</div>
+          <div class="feature"><b>Mean Frame Duration:</b> ${formatValue(video.Mean_Frame_Duration, "seconds")}</div>
+          <div class="feature"><b>Frame Duration Std:</b> ${formatValue(video.Frame_Duration_Std, "seconds")}</div>
+          <div class="feature"><b>Min Frame Duration:</b> ${formatValue(video.Min_Frame_Duration, "seconds")}</div>
+          <div class="feature"><b>Max Frame Duration:</b> ${formatValue(video.Max_Frame_Duration, "seconds")}</div>
+        </div>
+
+        <div class="card card-half">
+          <h3>🔊 Audio Complexity</h3>
+          <div class="feature"><b>Volume Range:</b> ${formatValue(video.Volume_Range, "dB")}</div>
+          <div class="feature"><b>Speech Detected (AST):</b> ${tf(video.Speech_Detected_AST)}</div>
+        </div>
+      </div>
+
+      <div class="card-pair">
+        <div class="card card-half">
+          <h3>🎥 Motion Analysis</h3>
+          <div class="feature"><b>Avg Motion Magnitude:</b> ${formatValue(video.Avg_Motion_Magnitude)}</div>
+          <div class="feature"><b>Avg Vector Count:</b> ${formatValue(video.Avg_Vector_Count, "vectors", 0)}</div>
+        </div>
+
+        <div class="card card-half">
+          <h3>🧠 Multimodal Characteristics</h3>
+          <div class="feature"><b>Animated Text:</b> ${tf(video.Animated_Text)}</div>
+        </div>
+      </div>
     </div>
+
     <div class="feature-column">
       <div class="card">
         <h3>🏷️ Annotation Tags</h3>
@@ -247,6 +248,7 @@ function showVideo(index) {
     </div>
   `;
 
+  layout.innerHTML = layoutHTML;
   updateButtons();
 }
 
