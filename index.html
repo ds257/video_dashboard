@@ -414,12 +414,14 @@ function showVideo(index) {
 <div class="feature"><b>Max Frame Duration:</b> ${formatValue(video.Max_Frame_Duration, "seconds")} ${dualIcons(video.Max_Frame_Duration, "Max_Frame_Duration")}</div>
 
         </div>
-
         <div class="card card-half">
-          <h3>🎥 Motion Analysis</h3>
-          <div class="feature"><b>Avg Motion Magnitude:</b> ${formatValue(video.Avg_Motion_Magnitude)}</div>
-          <div class="feature"><b>Avg Vector Count:</b> ${formatValue(video.Avg_Vector_Count, "vectors", 0)}</div>
-        </div>
+  <h3>🎥 Motion Analysis</h3>
+  <div class="feature"><b>Avg Motion Magnitude:</b> ${formatValue(video.Avg_Motion_Magnitude)}</div>
+  <div class="feature"><b>Avg Vector Count:</b> ${formatValue(video.Avg_Vector_Count, "vectors", 0)}</div>
+</div>
+
+
+        
       </div>
     </div>
 
@@ -430,10 +432,12 @@ function showVideo(index) {
       </div>
       ${geminiSummaryCard}
       <div class="card">
-        <h3>🔊 Audio Complexity</h3>
-        <div class="feature"><b>Volume Range:</b> ${formatValue(video.Volume_Range, "dB")}</div>
-        <div class="feature"><b>Speech Detected (AST):</b> ${tf(video.Speech_Detected_AST)}</div>
-      </div>
+  <h3>🔊 Audio Complexity</h3>
+  <div class="feature"><b>Volume Range:</b> ${formatValue(video.Volume_Range, "dB")} ${dualIcons(video.Volume_Range, "Volume_Range")}</div>
+  <div class="feature"><b>Speech Detected (AST):</b> ${tf(video.Speech_Detected_AST)}</div>
+</div>
+
+      
       <div class="card">
         <h3>🧠 Multimodal Characteristics</h3>
         <div class="feature"><b>Animated Text:</b> ${tf(video.Animated_Text)}</div>
