@@ -142,6 +142,33 @@
     .card-half {
       flex: 1 1 48%;
     }
+    .tooltip-icon {
+  display: inline-block;
+  margin-left: 6px;
+  cursor: pointer;
+  color: #2b6cb0;
+  position: relative;
+}
+
+.tooltip-icon:hover::after {
+  content: attr(data-tooltip);
+  display: block;
+  position: absolute;
+  background: #2d3748;
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  top: 1.6rem;
+  left: 0;
+  white-space: nowrap;
+  z-index: 1000;
+  transform: translateX(-10%);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+
+    
   </style>
 </head>
 <body>
@@ -208,12 +235,31 @@ const groupedAnnotations = {
 };
 
 function renderGroupedAnnotations(video) {
+  const definitions = {
+    "Package": "Visible presence of ONP product packaging.",
+    "Pouch": "Presence of a nicotine pouch outside its packaging.",
+    "ONP_use": "Someone is shown using or consuming an ONP.",
+    "Brand_ZYN": "Mentions or displays the ZYN brand.",
+    "Brand_Velo": "Mentions or displays the Velo brand.",
+    "Brand_Iceberg": "Mentions or displays the Iceberg brand.",
+    "Vapes": "Presence or use of vape/e-cigarette products.",
+    "Misinformation": "Contains misleading or false claims about nicotine or ONP.",
+    "VT_Entertaining": "Video is framed as fun, entertaining, or humorous.",
+    "VT_Anti_ONP": "Video takes a critical or negative stance toward ONP.",
+    "VT_Quit_with_ONP": "Suggests using ONP to quit smoking or vaping.",
+    "VT_ONP_Sport": "Relates ONP to sports, fitness, or athletic performance.",
+    "human_subjects": "Video includes real people.",
+    "ethnic_minority": "Person(s) appear from underrepresented racial/ethnic groups.",
+    "YA(Young Adult 21-30)": "Main subject appears to be aged 21–30."
+  };
+
   let html = "";
   for (const [group, keys] of Object.entries(groupedAnnotations)) {
     html += `<h4 style="margin-top: 1rem; color: #2b6cb0;">${group}</h4>`;
     keys.forEach(key => {
       const rawValue = video[key];
       const value = tf(rawValue);
+
       const label = key
         .replace(/_/g, " ")
         .replace("ONP use", "ONP Use")
@@ -224,7 +270,14 @@ function renderGroupedAnnotations(video) {
         .replace("VT ", "")
         .replace("human subjects", "Human Subjects")
         .replace("ethnic minority", "Ethnic Minority");
-      html += `<div class="feature"><b>${label}:</b> ${value}</div>`;
+
+      const tooltip = definitions[key] || "";
+
+      html += `
+        <div class="feature">
+          <b>${label}:</b> ${value}
+          ${tooltip ? `<span class="tooltip-icon" data-tooltip="${tooltip}">ℹ️</span>` : ""}
+        </div>`;
     });
   }
   return html;
