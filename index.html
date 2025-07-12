@@ -256,6 +256,14 @@ function renderGroupedAnnotations(video) {
     "YA(Young Adult 21-30)": "Main subject appears to be aged 21–30."
   };
 
+   const icons = {
+    "Package": "📦", "Pouch": "📦", "ONP_use": "📦",
+    "Brand_ZYN": "🏷️", "Brand_Velo": "🏷️", "Brand_Iceberg": "🏷️",
+    "Vapes": "🚬", "Misinformation": "🚬",
+    "VT_Entertaining": "🎭", "VT_Anti_ONP": "🎭", "VT_Quit_with_ONP": "🎭", "VT_ONP_Sport": "🎭",
+    "human_subjects": "👤", "ethnic_minority": "👤", "YA(Young Adult 21-30)": "👤"
+  };
+
 
   let html = "";
   for (const [group, keys] of Object.entries(groupedAnnotations)) {
