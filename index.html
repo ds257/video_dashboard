@@ -414,10 +414,18 @@ function showVideo(index) {
 <div class="feature"><b>Max Frame Duration:</b> ${formatValue(video.Max_Frame_Duration, "seconds")} ${dualIcons(video.Max_Frame_Duration, "Max_Frame_Duration")}</div>
 
         </div>
-        <div class="card card-half">
+       
+
+<div class="card card-half">
   <h3>🎥 Motion Analysis</h3>
-  <div class="feature"><b>Avg Motion Magnitude:</b> ${formatValue(video.Avg_Motion_Magnitude)}</div>
-  <div class="feature"><b>Avg Vector Count:</b> ${formatValue(video.Avg_Vector_Count, "vectors", 0)}</div>
+  <div class="feature"><b>Avg Motion Magnitude:</b> 
+    ${formatValue(video.Avg_Motion_Magnitude)} 
+    ${dualIcons(video.Avg_Motion_Magnitude, "Avg_Motion_Magnitude")}
+  </div>
+  <div class="feature"><b>Avg Vector Count:</b> 
+    ${formatValue(video.Avg_Vector_Count, "vectors", 0)} 
+    ${dualIcons(video.Avg_Vector_Count, "Avg_Vector_Count")}
+  </div>
 </div>
 
 
