@@ -317,12 +317,22 @@ function showVideo(index) {
        </div>`
     : "";
 
-  const sentimentTags = `
-    ${tf(video.Foreign_language) === "Yes" ? '<span class="tag-pill tag-foreign">🌐 Foreign Language</span>' : ""}
-    ${tf(video.Positive) === "Yes" ? '<span class="tag-pill tag-positive">😊 Positive</span>' : ""}
-    ${tf(video.Negative) === "Yes" ? '<span class="tag-pill tag-negative">😠 Negative</span>' : ""}
-    ${tf(video.Neutral) === "Yes" ? '<span class="tag-pill tag-neutral">😐 Neutral</span>' : ""}
-  `;
+ const sentimentTags = `
+  ${tf(video.Foreign_language) === "Yes" ? `
+    <span class="tag-pill tag-foreign">
+      🌐 Foreign Language 
+      <img 
+        src="https://upload.wikimedia.org/wikipedia/commons/d/d7/Google_Translate_logo.svg" 
+        alt="Translate" 
+        title="Translate to English"
+        onclick="toggleTranslation()"
+        style="height: 16px; width: 16px; margin-left: 4px; vertical-align: middle; cursor: pointer;" />
+    </span>` : ""}
+  ${tf(video.Positive) === "Yes" ? '<span class="tag-pill tag-positive">😊 Positive</span>' : ""}
+  ${tf(video.Negative) === "Yes" ? '<span class="tag-pill tag-negative">😠 Negative</span>' : ""}
+  ${tf(video.Neutral) === "Yes" ? '<span class="tag-pill tag-neutral">😐 Neutral</span>' : ""}
+`;
+
 
   const annotationsHTML = renderGroupedAnnotations(video);
 
