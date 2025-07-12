@@ -296,6 +296,55 @@ function renderGroupedAnnotations(video) {
 }
 
 
+let globalStats = {};
+
+function getPercentile(value, allValues) {
+  const sorted = [...allValues].map(Number).sort((a, b) => a - b);
+  const index = sorted.findIndex(v => value <= v);
+  return Math.round((index / sorted.length) * 100);
+}
+
+function interpretPercentile(metric, val, pct) {
+  if (metric.includes("Duration")) {
+    if (pct >= 90) return `${val}s — ${pct}th percentile (Very long video)`;
+    if (pct >= 75) return `${val}s — ${pct}th percentile (Long video)`;
+    if (pct >= 40) return `${val}s — ${pct}th percentile (Typical length)`;
+    return `${val}s — ${pct}th percentile (Short video)`;
+  }
+  if (metric === "Scene_Cuts") {
+    if (pct >= 90) return `${val} cuts — ${pct}th percentile (High pacing)`;
+    return `${val} cuts — ${pct}th percentile`;
+  }
+  if (metric === "Volume_Range") {
+    if (pct >= 70) return `${val} dB — ${pct}th percentile (Loud audio)`;
+    if (pct <= 30) return `${val} dB — ${pct}th percentile (Quiet audio)`;
+    return `${val} dB — ${pct}th percentile`;
+  }
+  if (metric === "Avg_Motion_Magnitude") {
+    if (pct >= 70) return `${val} — ${pct}th percentile (High movement)`;
+    if (pct <= 30) return `${val} — ${pct}th percentile (Low movement)`;
+    return `${val} — ${pct}th percentile`;
+  }
+  return `${val} — ${pct}th percentile`;
+}
+
+function dualIcons(value, metric) {
+  const all = globalStats[metric] || [];
+  const val = parseFloat(value);
+  if (isNaN(val) || !all.length) return "";
+
+  const pct = getPercentile(val, all);
+  const explain = `This is the actual ${metric.replace(/_/g, " ").toLowerCase()}.`;
+  const compare = interpretPercentile(metric, val, pct);
+
+  return `
+    <span class="tooltip-icon" data-tooltip="${explain}">ℹ️</span>
+    <span class="tooltip-icon" data-tooltip="${compare}">📊</span>
+  `;
+}
+
+
+
 function showVideo(index) {
   const video = filteredData[index];
   if (!video) return;
@@ -357,12 +406,13 @@ function showVideo(index) {
       <div class="card-pair">
         <div class="card card-half">
           <h3>⏱️ Temporal Dynamics</h3>
-          <div class="feature"><b>Duration:</b> ${formatValue(video.Duration, "seconds")}</div>
-          <div class="feature"><b>Scene Cuts:</b> ${formatValue(video.Scene_Cuts, "cuts", 0)}</div>
-          <div class="feature"><b>Mean Frame Duration:</b> ${formatValue(video.Mean_Frame_Duration, "seconds")}</div>
-          <div class="feature"><b>Frame Duration Std:</b> ${formatValue(video.Frame_Duration_Std, "seconds")}</div>
-          <div class="feature"><b>Min Frame Duration:</b> ${formatValue(video.Min_Frame_Duration, "seconds")}</div>
-          <div class="feature"><b>Max Frame Duration:</b> ${formatValue(video.Max_Frame_Duration, "seconds")}</div>
+         <div class="feature"><b>Duration:</b> ${formatValue(video.Duration, "seconds")} ${dualIcons(video.Duration, "Duration")}</div>
+<div class="feature"><b>Scene Cuts:</b> ${formatValue(video.Scene_Cuts, "cuts", 0)} ${dualIcons(video.Scene_Cuts, "Scene_Cuts")}</div>
+<div class="feature"><b>Mean Frame Duration:</b> ${formatValue(video.Mean_Frame_Duration, "seconds")} ${dualIcons(video.Mean_Frame_Duration, "Mean_Frame_Duration")}</div>
+<div class="feature"><b>Frame Duration Std:</b> ${formatValue(video.Frame_Duration_Std, "seconds")} ${dualIcons(video.Frame_Duration_Std, "Frame_Duration_Std")}</div>
+<div class="feature"><b>Min Frame Duration:</b> ${formatValue(video.Min_Frame_Duration, "seconds")} ${dualIcons(video.Min_Frame_Duration, "Min_Frame_Duration")}</div>
+<div class="feature"><b>Max Frame Duration:</b> ${formatValue(video.Max_Frame_Duration, "seconds")} ${dualIcons(video.Max_Frame_Duration, "Max_Frame_Duration")}</div>
+
         </div>
 
         <div class="card card-half">
@@ -483,7 +533,17 @@ function loadMainCSV() {
         complete: results => {
           videoData = results.data;
           filteredData = [...videoData];
-          showVideo(currentIndex);
+          // Compute global stats for percentiles
+          const metrics = [
+            "Duration", "Scene_Cuts", "Mean_Frame_Duration",
+            "Frame_Duration_Std", "Min_Frame_Duration", "Max_Frame_Duration",
+            "Volume_Range", "Avg_Motion_Magnitude", "Avg_Vector_Count"
+          ];
+          for (const metric of metrics) {
+            globalStats[metric] = results.data.map(row => parseFloat(row[metric])).filter(val => !isNaN(val));
+          }
+
+showVideo(currentIndex);
         }
       });
     });
