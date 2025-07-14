@@ -234,7 +234,8 @@ function toggleTranslation() {
 const groupedAnnotations = {
   "📦 ONP Product Presence": ["Package", "Pouch", "ONP_use"],
   "🏷️ Brand Mentions": ["Brand_ZYN", "Brand_Velo", "Brand_Iceberg"],
-  "🚬 Substances": ["Vapes", "Misinformation"],
+  "🚬 Substances": ["Vapes"],
+  "⚠️ Harmful or Misleading": ["Misinformation"],
   "🎭 Video Type / Theme": ["VT_Entertaining", "VT_Anti_ONP", "VT_Quit_with_ONP", "VT_ONP_Sport"],
   "👤 Demographics": ["human_subjects", "ethnic_minority", "YA(Young Adult 21-30)"]
 };
@@ -255,7 +256,7 @@ function renderGroupedAnnotations(video) {
     "VT_ONP_Sport": "Relates ONP to sports, fitness, or athletic performance.",
     "human_subjects": "Video includes real people.",
     "ethnic_minority": "Person(s) appear from underrepresented racial/ethnic groups.",
-    "YA(Young Adult 21-30)": "Main subject appears to be aged 21–30."
+    "Young Adult": "Main subject appears to be aged 21–30."
   };
 
    const icons = {
@@ -300,38 +301,41 @@ function renderGroupedAnnotations(video) {
 
 let globalStats = {};
 
-function getPercentile(value, allValues) {
-  const sorted = [...allValues].map(Number).sort((a, b) => a - b);
-  const index = sorted.findIndex(v => value <= v);
-  return Math.round((index / sorted.length) * 100);
-}
-
 function interpretPercentile(metric, val, pct) {
   const valueStr = parseFloat(val).toFixed(1);  // Format to 1 decimal place
   const pctStr = `${pct}th percentile`;
 
-  if (metric.includes("Duration")) {
+  if (metric === "Duration") {
     if (pct >= 90) return `${valueStr}s — ${pctStr} (Very long video)`;
     if (pct >= 75) return `${valueStr}s — ${pctStr} (Long video)`;
     if (pct >= 40) return `${valueStr}s — ${pctStr} (Typical length)`;
     return `${valueStr}s — ${pctStr} (Short video)`;
   }
+
   if (metric === "Scene_Cuts") {
     if (pct >= 90) return `${valueStr} cuts — ${pctStr} (High pacing)`;
     return `${valueStr} cuts — ${pctStr}`;
   }
+
   if (metric === "Volume_Range") {
     if (pct >= 70) return `${valueStr} dB — ${pctStr} (Loud audio)`;
     if (pct <= 30) return `${valueStr} dB — ${pctStr} (Quiet audio)`;
     return `${valueStr} dB — ${pctStr}`;
   }
+
   if (metric === "Avg_Motion_Magnitude") {
     if (pct >= 70) return `${valueStr} — ${pctStr} (High movement)`;
     if (pct <= 30) return `${valueStr} — ${pctStr} (Low movement)`;
     return `${valueStr} — ${pctStr}`;
   }
+
+  if (["Mean_Frame_Duration", "Frame_Duration_Std", "Min_Frame_Duration", "Max_Frame_Duration"].includes(metric)) {
+    return `${valueStr}s — ${pctStr}`;
+  }
+
   return `${valueStr} — ${pctStr}`;
 }
+
 
 function dualIcons(value, metric) {
   const all = globalStats[metric] || [];
@@ -441,11 +445,11 @@ function showVideo(index) {
 
 <div class="card card-half">
   <h3>🎥 Motion Analysis</h3>
-  <div class="feature"><b>Avg Motion Magnitude:</b> 
+  <div class="feature"><b>Average Motion Magnitude:</b> 
     ${formatValue(video.Avg_Motion_Magnitude)} 
     ${dualIcons(video.Avg_Motion_Magnitude, "Avg_Motion_Magnitude")}
   </div>
-  <div class="feature"><b>Avg Vector Count:</b> 
+  <div class="feature"><b>Average Vector Count:</b> 
     ${formatValue(video.Avg_Vector_Count, "vectors", 0)} 
     ${dualIcons(video.Avg_Vector_Count, "Avg_Vector_Count")}
   </div>
@@ -465,7 +469,7 @@ function showVideo(index) {
       <div class="card">
   <h3>🔊 Audio Complexity</h3>
   <div class="feature"><b>Volume Range:</b> ${formatValue(video.Volume_Range, "dB")} ${dualIcons(video.Volume_Range, "Volume_Range")}</div>
-  <div class="feature"><b>Speech Detected (AST):</b> ${tf(video.Speech_Detected_AST)}</div>
+  <div class="feature"><b>Speech Detected:</b> ${tf(video.Speech_Detected_AST)}</div>
 </div>
 
       
