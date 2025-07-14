@@ -364,48 +364,6 @@ function dualIcons(value, metric) {
 }
 
 
-function countEmojisInText(text) {
-  const emojiRegex = /[\p{Emoji}\uFE0F]/gu;
-  return (text.match(emojiRegex) || []).length;
-}
-
-function extractEmojisAndDisplay() {
-  const layout = document.getElementById("videoFeatureLayout");
-  const video = filteredData[currentIndex];
-  const baseFile = (video.Video_File || "").replace(".mp4", "").trim();
-  const captionText = transcriptData[baseFile] || "";
-  const emojiCount = countEmojisInText(captionText);
-
-  const captionDiv = document.createElement("div");
-  captionDiv.innerHTML = `<div class="card"><h3>🔣 Emoji Analysis</h3><div class="feature"><b>Emoji Count:</b> ${emojiCount}</div></div>`;
-
-  const featureColumn = document.querySelector(".feature-column");
-  if (featureColumn) featureColumn.insertBefore(captionDiv, featureColumn.firstChild);
-}
-
-function exportEmojiCountsCSV() {
-  const rows = ["Video_File,Emoji_Count"];
-  filteredData.forEach(video => {
-    const baseFile = (video.Video_File || "").replace(".mp4", "").trim();
-    const caption = transcriptData[baseFile] || "";
-    const count = countEmojisInText(caption);
-    rows.push(`${baseFile}.mp4,${count}`);
-  });
-
-  const blob = new Blob([rows.join("\n")], { type: "text/csv" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "emoji_counts.csv";
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-const originalShowVideo = showVideo;
-showVideo = function(index) {
-  originalShowVideo(index);
-  setTimeout(extractEmojisAndDisplay, 300);
-};
 
 
 
