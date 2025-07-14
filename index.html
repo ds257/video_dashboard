@@ -336,7 +336,22 @@ function dualIcons(value, metric) {
   if (isNaN(val) || !all.length) return "";
 
   const pct = getPercentile(val, all);
-  const explain = `This is the actual ${metric.replace(/_/g, " ").toLowerCase()}.`;
+
+  const explanations = {
+    "Duration": "Total video length in seconds.",
+    "Scene_Cuts": "Number of times the scene changes — higher values mean faster editing.",
+    "Mean_Frame_Duration": "Average display time per frame — lower values suggest faster transitions.",
+    "Frame_Duration_Std": "Variation in frame durations — high values indicate inconsistent pacing.",
+    "Min_Frame_Duration": "Shortest duration any single frame is shown — can indicate sudden cuts.",
+    "Max_Frame_Duration": "Longest time a frame is displayed — may indicate still scenes or pauses.",
+    "Avg_Motion_Magnitude": "Average intensity of movement — higher means more dynamic motion.",
+    "Avg_Vector_Count": "Average number of detected motion vectors — relates to how much movement is in the scene.",
+    "Volume_Range": "Difference between the quietest and loudest moments — high values suggest dynamic audio.",
+    "Speech_Detected_AST": "Indicates if speech was detected in the audio using audio tagging.",
+    "Animated_Text": "Presence of animated or overlaid text within the video."
+  };
+
+  const explain = explanations[metric] || `This is the actual ${metric.replace(/_/g, " ").toLowerCase()}.`;
   const compare = interpretPercentile(metric, val, pct);
 
   return `
