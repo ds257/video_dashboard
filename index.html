@@ -307,27 +307,30 @@ function getPercentile(value, allValues) {
 }
 
 function interpretPercentile(metric, val, pct) {
+  const valueStr = parseFloat(val).toFixed(1);  // Format to 1 decimal place
+  const pctStr = `${pct}th percentile`;
+
   if (metric.includes("Duration")) {
-    if (pct >= 90) return `${val}s — ${pct}th percentile (Very long video)`;
-    if (pct >= 75) return `${val}s — ${pct}th percentile (Long video)`;
-    if (pct >= 40) return `${val}s — ${pct}th percentile (Typical length)`;
-    return `${val}s — ${pct}th percentile (Short video)`;
+    if (pct >= 90) return `${valueStr}s — ${pctStr} (Very long video)`;
+    if (pct >= 75) return `${valueStr}s — ${pctStr} (Long video)`;
+    if (pct >= 40) return `${valueStr}s — ${pctStr} (Typical length)`;
+    return `${valueStr}s — ${pctStr} (Short video)`;
   }
   if (metric === "Scene_Cuts") {
-    if (pct >= 90) return `${val} cuts — ${pct}th percentile (High pacing)`;
-    return `${val} cuts — ${pct}th percentile`;
+    if (pct >= 90) return `${valueStr} cuts — ${pctStr} (High pacing)`;
+    return `${valueStr} cuts — ${pctStr}`;
   }
   if (metric === "Volume_Range") {
-    if (pct >= 70) return `${val} dB — ${pct}th percentile (Loud audio)`;
-    if (pct <= 30) return `${val} dB — ${pct}th percentile (Quiet audio)`;
-    return `${val} dB — ${pct}th percentile`;
+    if (pct >= 70) return `${valueStr} dB — ${pctStr} (Loud audio)`;
+    if (pct <= 30) return `${valueStr} dB — ${pctStr} (Quiet audio)`;
+    return `${valueStr} dB — ${pctStr}`;
   }
   if (metric === "Avg_Motion_Magnitude") {
-    if (pct >= 70) return `${val} — ${pct}th percentile (High movement)`;
-    if (pct <= 30) return `${val} — ${pct}th percentile (Low movement)`;
-    return `${val} — ${pct}th percentile`;
+    if (pct >= 70) return `${valueStr} — ${pctStr} (High movement)`;
+    if (pct <= 30) return `${valueStr} — ${pctStr} (Low movement)`;
+    return `${valueStr} — ${pctStr}`;
   }
-  return `${val} — ${pct}th percentile`;
+  return `${valueStr} — ${pctStr}`;
 }
 
 function dualIcons(value, metric) {
