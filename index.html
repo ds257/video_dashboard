@@ -180,7 +180,17 @@
 
   <input type="text" id="searchInput" placeholder="🔍 Search by filename or keyword..." />
 
-  <div class="progress" id="progressCounter">Loading...</div>
+<!-- Add Misinformation Button -->
+<button onclick="filterMisinformation()" style="margin-bottom: 1rem; background: #e53e3e; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer;">
+  🎯 Show Correct Misinformation Videos
+</button>
+  <button onclick="resetFilter()" style="margin-left: 1rem; background: #4a5568; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer;">
+  🔄 Reset to All Videos
+</button>
+
+
+<div class="progress" id="progressCounter">Loading...</div>
+
 
   <div class="row" id="videoFeatureLayout">Loading viewer...</div>
 
@@ -583,6 +593,31 @@ showVideo(currentIndex);
       });
     });
 }
+  function filterMisinformation() {
+  // Updated list of 6 true positive misinformation Video_IDs
+  const truePositiveIDs = [
+    "7222687741635497221",
+    "7188143795848989958",
+    "7220109077127449862",
+    "7135219294308142378",
+    "7240575117678382379",
+    "7218568396995185925"
+  ];
+
+  filteredData = videoData.filter(v => {
+    const id = String(v.Video_ID || "").trim();
+    return truePositiveIDs.includes(id);
+  });
+
+  currentIndex = 0;
+  showVideo(currentIndex);
+}
+function resetFilter() {
+  filteredData = [...videoData];
+  currentIndex = 0;
+  showVideo(currentIndex);
+}
+
 
 window.onload = () => {
   loadTranscriptCSV();
