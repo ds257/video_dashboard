@@ -320,7 +320,7 @@ function interpretPercentile(metric, val, pct) {
   const valueStr = parseFloat(val).toFixed(1);  // Format to 1 decimal place
   const pctStr = `${pct}th percentile`;
 
-  if (metric.includes("Duration")) {
+ if (metric === "Duration") {
     if (pct >= 90) return `${valueStr}s — ${pctStr} (Very long video)`;
     if (pct >= 75) return `${valueStr}s — ${pctStr} (Long video)`;
     if (pct >= 40) return `${valueStr}s — ${pctStr} (Typical length)`;
@@ -340,6 +340,10 @@ function interpretPercentile(metric, val, pct) {
     if (pct <= 30) return `${valueStr} — ${pctStr} (Low movement)`;
     return `${valueStr} — ${pctStr}`;
   }
+  if (["Mean_Frame_Duration", "Frame_Duration_Std", "Min_Frame_Duration", "Max_Frame_Duration"].includes(metric)) {
+  return `${valueStr}s — ${pctStr}`;
+}
+
   return `${valueStr} — ${pctStr}`;
 }
 
