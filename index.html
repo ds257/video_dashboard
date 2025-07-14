@@ -472,6 +472,8 @@ function showVideo(index) {
       <div class="card">
         <h3>🧠 Multimodal Characteristics</h3>
         <div class="feature"><b>Animated Text:</b> ${tf(video.Animated_Text)}</div>
+        <div class="feature"><b>Emoji Count:</b> ${formatValue(video.Emoji_Count, "emojis", 0)}</div>
+  <div class="feature"><b>Music:</b> ${video.Music || "None"}</div>
       </div>
     </div>
   `;
