@@ -243,12 +243,14 @@ function toggleTranslation() {
 
 const groupedAnnotations = {
   "📦 ONP Product Presence": ["Package", "Pouch", "ONP_use"],
-  "🏷️ Brand Mentions": ["Brand_ZYN", "Brand_Velo", "Brand_Iceberg"],
-   "🚬 Substances": ["Vapes"],
-  "⚠️ Misinformation":["False or misleading claims"],
-  "🎭 Video Type / Theme": ["VT_Entertaining", "VT_Anti_ONP", "VT_Quit_with_ONP", "VT_ONP_Sport"],
+  "🏷️ Brand Mention": ["Dominant_Brand"],
+  "🍒 Dominant Flavor": ["Dominant_Flavor"],
+  "🎭 Video Theme": ["Video_Theme"],
+  "🚬 Substances": ["Vapes"],
+  "⚠️ Misinformation": ["False or misleading claims"],
   "👤 Demographics": ["human_subjects", "ethnic_minority", "Young Adult"]
 };
+
 
 function renderGroupedAnnotations(video) {
   const definitions = {
@@ -267,6 +269,9 @@ function renderGroupedAnnotations(video) {
     "human_subjects": "Video includes real people.",
     "ethnic_minority": "Person(s) appear from underrepresented racial/ethnic groups.",
     "Young Adult": "Main subject appears to be aged 21–30."
+    "Dominant_Brand": "Most prominently featured or mentioned brand in the video.",
+  "Dominant_Flavor": "Flavor category most clearly associated with the product in the video.",
+  "Video_Theme": "Primary theme conveyed by the video content."
   };
 
    const icons = {
@@ -415,10 +420,13 @@ function showVideo(index) {
         onclick="toggleTranslation()"
         style="height: 16px; width: 16px; margin-left: 4px; vertical-align: middle; cursor: pointer;" />
     </span>` : ""}
+  ${String(video.Positive_gt) === "1" ? '<span class="tag-pill tag-positive" title="Ground truth: video promotes or positively frames ONP use.">✅ Positive (GT)</span>' : ""}
+  ${String(video.Negative_gt) === "1" ? '<span class="tag-pill tag-negative" title="Ground truth: video criticizes or opposes ONP use.">⚠️ Negative (GT)</span>' : ""}
   ${tf(video.Positive) === "Yes" ? '<span class="tag-pill tag-positive">😊 Positive</span>' : ""}
   ${tf(video.Negative) === "Yes" ? '<span class="tag-pill tag-negative">😠 Negative</span>' : ""}
   ${tf(video.Neutral) === "Yes" ? '<span class="tag-pill tag-neutral">😐 Neutral</span>' : ""}
 `;
+
 
 
   const annotationsHTML = renderGroupedAnnotations(video);
