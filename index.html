@@ -270,11 +270,13 @@ function renderGroupedAnnotations(video) {
     "ethnic_minority": "Person(s) appear from underrepresented racial/ethnic groups.",
     "Young Adult": "Main subject appears to be aged 21–30.",
     "Dominant_Brand": "Most prominently featured or mentioned brand in the video.",
-  "Dominant_Flavor": "Flavor category most clearly associated with the product in the video.",
-  "Video_Theme": "Primary theme conveyed by the video content."
+    "Dominant_Flavor": "Flavor category most clearly associated with the product in the video.",
+    "Video_Theme": "Primary theme conveyed by the video content."
   };
 
-   const icons = {
+  const directFields = ["Dominant_Brand", "Dominant_Flavor", "Video_Theme"];
+
+  const icons = {
     "Package": "", "Pouch": "", "ONP_use": "",
     "Brand_ZYN": "", "Brand_Velo": "", "Brand_Iceberg": "",
     "Vapes": "", "Misinformation": "",
@@ -282,13 +284,12 @@ function renderGroupedAnnotations(video) {
     "human_subjects": "", "ethnic_minority": "", "YA(Young Adult 21-30)": ""
   };
 
-
   let html = "";
   for (const [group, keys] of Object.entries(groupedAnnotations)) {
     html += `<h4 style="margin-top: 1rem; color: #2b6cb0;">${group}</h4>`;
     keys.forEach(key => {
       const rawValue = video[key];
-      const value = tf(rawValue);
+      const value = directFields.includes(key) ? (rawValue || "None") : tf(rawValue);
       const icon = icons[key] || "";
       const def = definitions[key] || "";
       const label = key
@@ -312,6 +313,7 @@ function renderGroupedAnnotations(video) {
   }
   return html;
 }
+
 
 
 let globalStats = {};
