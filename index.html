@@ -288,7 +288,8 @@ function renderGroupedAnnotations(video) {
     "YA": "Young Adult",
   "Misinformation": "False or misleading claims"
 };
-      const label = key.replace(/_/g, " ");
+      const label = labelMap[key] || key.replace(/_/g, " ");
+
       const icon = icons[key] || "";
       const def = definitions[key] || "";
 
