@@ -289,7 +289,7 @@ function renderGroupedAnnotations(video) {
       const def = definitions[key] || "";
 
       const isMulticlass = key.includes("Dominant") || key === "Video_Theme";
-      const predVal = video[`${key}_pred`] ?? video[key] ?? "None";
+      const predVal = video[`${key}_pred`] ?? video[key];
       const gtVal = video[`${key}_gt`] ?? "None";
 
       if (isMulticlass) {
@@ -301,8 +301,8 @@ function renderGroupedAnnotations(video) {
             :</b> ${predVal}
           </div>`);
       } else {
-        const display = predVal === 1 || predVal === "1" || predVal === "Yes" ? "✅ Yes" : "❌ No";
-        const truth = gtVal === 1 || gtVal === "1" || gtVal === "Yes" ? "Yes" : "No";
+        const display = predVal == 1 ? "✅ Yes" : "❌ No"; // handles 1 or 1.0
+        const truth = gtVal == 1 ? "Yes" : "No";           // handles 1 or 1.0
         htmlLines.push(`
           <div class="feature">
             <b>${icon} ${label}
@@ -316,7 +316,6 @@ function renderGroupedAnnotations(video) {
 
   return htmlLines.join("");
 }
-
 
 
 let globalStats = {};
