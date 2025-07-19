@@ -274,52 +274,52 @@ function renderGroupedAnnotations(video) {
     "Video_Theme": "Primary theme conveyed by the video content."
   };
 
-  const directFields = ["Dominant_Brand", "Dominant_Flavor", "Video_Theme"];
-
   const icons = {
-    "Package": "", "Pouch": "", "ONP_use": "",
+    "Package": "📦", "Pouch": "", "ONP_use": "",
     "Brand_ZYN": "🟢", "Brand_Velo": "🔵", "Brand_Iceberg": "🧊",
     "Vapes": "💨", "False or misleading claims": "⚠️",
     "VT_Entertaining": "🎉", "VT_Anti_ONP": "🚫", "VT_Quit_with_ONP": "🚭", "VT_ONP_Sport": "🏅",
-    "human_subjects": "👤", "ethnic_minority": "🌎", "Young Adult": "🧑‍🎓",
+    "human_subjects": "👤", "ethnic_minority": "🌍", "Young Adult": "🧑‍🎓",
     "Dominant_Brand": "🏷️", "Dominant_Flavor": "🍒", "Video_Theme": "🎬"
   };
 
-  let html = "";
+  const htmlLines = [];
 
   for (const [group, keys] of Object.entries(groupedAnnotations)) {
-    html += `<h4 style="margin-top: 1rem; color: #2b6cb0;">${group}</h4>`;
+    htmlLines.push(`<h4 style="margin-top: 1rem; color: #2b6cb0;">${group}</h4>`);
+
     keys.forEach(key => {
-      const def = definitions[key] || "";
+      const label = key.replace(/_/g, " ");
       const icon = icons[key] || "";
-      const label = key.replace(/_/g, " ").replace("YA\\(Young Adult 21-30\\)", "Young Adult");
+      const def = definitions[key] || "";
 
-      if (directFields.includes(key)) {
-        const pred = video[`${key}_pred`] || "None";
-        const gt = video[`${key}_gt`] || "None";
-        const tooltip = `Predicted: ${pred}\nGround Truth: ${gt}`;
+      const isMulticlass = key.includes("Dominant") || key === "Video_Theme";
+      const predVal = video[`${key}_pred`] ?? video[key];
+      const gtVal = video[`${key}_gt`] ?? "None";
 
-        html += `
+      if (isMulticlass) {
+        htmlLines.push(`
           <div class="feature">
             <b>${icon} ${label}
               <span class="tooltip-icon" data-tooltip="${def}">ℹ️</span>
-              <span class="tooltip-icon" data-tooltip="${tooltip}">📌</span>
-            </b>
-          </div>`;
+              <span class="tooltip-icon" data-tooltip="Ground Truth: ${gtVal}">📌</span>
+            :</b> ${predVal}
+          </div>`);
       } else {
-        const gtVal = video[`${key}_gt`] ?? video[key];
-        const gtDisplay = tf(gtVal) === "Yes" ? "✅ Yes" : "❌ No";
-        html += `
+        const display = predVal === 1 || predVal === "1" ? "✅ Yes" : "❌ No";
+        const truth = gtVal === 1 || gtVal === "1" ? "Yes" : "No";
+        htmlLines.push(`
           <div class="feature">
             <b>${icon} ${label}
               <span class="tooltip-icon" data-tooltip="${def}">ℹ️</span>
-            :</b> ${gtDisplay}
-          </div>`;
+              <span class="tooltip-icon" data-tooltip="Ground Truth: ${truth}"></span>
+            :</b> ${display}
+          </div>`);
       }
     });
   }
 
-  return html;
+  return htmlLines.join("");
 }
 
 
