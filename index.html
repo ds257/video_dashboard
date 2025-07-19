@@ -283,44 +283,46 @@ function renderGroupedAnnotations(video) {
     "Dominant_Brand": "🏷️", "Dominant_Flavor": "🍒", "Video_Theme": "🎬"
   };
 
-  const htmlLines = [];
+  const directTextFields = ["Dominant_Brand", "Dominant_Flavor", "Video_Theme"];
+  let html = "";
 
   for (const [group, keys] of Object.entries(groupedAnnotations)) {
-    htmlLines.push(`<h4 style="margin-top: 1rem; color: #2b6cb0;">${group}</h4>`);
+    html += `<h4 style="margin-top: 1rem; color: #2b6cb0;">${group}</h4>`;
 
     keys.forEach(key => {
-      const label = key.replace(/_/g, " ");
       const icon = icons[key] || "";
+      const label = key.replace(/_/g, " ");
       const def = definitions[key] || "";
 
-      const isMulticlass = key.includes("Dominant") || key === "Video_Theme";
+      const isText = directTextFields.includes(key);
       const predVal = video[`${key}_pred`] ?? video[key];
       const gtVal = video[`${key}_gt`] ?? "None";
 
-      if (isMulticlass) {
-        htmlLines.push(`
+      if (isText) {
+        html += `
           <div class="feature">
             <b>${icon} ${label}
               <span class="tooltip-icon" data-tooltip="${def}">ℹ️</span>
               <span class="tooltip-icon" data-tooltip="Ground Truth: ${gtVal}">📌</span>
             :</b> ${predVal}
-          </div>`);
+          </div>`;
       } else {
         const display = predVal === 1 || predVal === "1" ? "✅ Yes" : "❌ No";
         const truth = gtVal === 1 || gtVal === "1" ? "Yes" : "No";
-        htmlLines.push(`
+        html += `
           <div class="feature">
             <b>${icon} ${label}
               <span class="tooltip-icon" data-tooltip="${def}">ℹ️</span>
-              <span class="tooltip-icon" data-tooltip="Ground Truth: ${truth}"></span>
+              <span class="tooltip-icon" data-tooltip="Ground Truth: ${truth}">📌</span>
             :</b> ${display}
-          </div>`);
+          </div>`;
       }
     });
   }
 
-  return htmlLines.join("");
+  return html;
 }
+
 
 
 
