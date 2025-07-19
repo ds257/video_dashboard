@@ -278,41 +278,50 @@ function renderGroupedAnnotations(video) {
 
   const icons = {
     "Package": "", "Pouch": "", "ONP_use": "",
-    "Brand_ZYN": "", "Brand_Velo": "", "Brand_Iceberg": "",
-    "Vapes": "", "Misinformation": "",
-    "VT_Entertaining": "", "VT_Anti_ONP": "", "VT_Quit_with_ONP": "", "VT_ONP_Sport": "",
-    "human_subjects": "", "ethnic_minority": "", "YA(Young Adult 21-30)": ""
+    "Brand_ZYN": "🟢", "Brand_Velo": "🔵", "Brand_Iceberg": "🧊",
+    "Vapes": "💨", "False or misleading claims": "⚠️",
+    "VT_Entertaining": "🎉", "VT_Anti_ONP": "🚫", "VT_Quit_with_ONP": "🚭", "VT_ONP_Sport": "🏅",
+    "human_subjects": "👤", "ethnic_minority": "🌎", "Young Adult": "🧑‍🎓",
+    "Dominant_Brand": "🏷️", "Dominant_Flavor": "🍒", "Video_Theme": "🎬"
   };
 
   let html = "";
+
   for (const [group, keys] of Object.entries(groupedAnnotations)) {
     html += `<h4 style="margin-top: 1rem; color: #2b6cb0;">${group}</h4>`;
     keys.forEach(key => {
-      const rawValue = video[key];
-      const value = directFields.includes(key) ? (rawValue || "None") : tf(rawValue);
-      const icon = icons[key] || "";
       const def = definitions[key] || "";
-      const label = key
-        .replace(/_/g, " ")
-        .replace("ONP use", "ONP Use")
-        .replace("Brand ZYN", "Brand ZYN")
-        .replace("Brand Velo", "Brand Velo")
-        .replace("Brand Iceberg", "Brand Iceberg")
-        .replace("YA\\(Young Adult 21-30\\)", "Young Adult")
-        .replace("VT ", "")
-        .replace("human subjects", "Human Subjects")
-        .replace("ethnic minority", "Ethnic Minority");
+      const icon = icons[key] || "";
+      const label = key.replace(/_/g, " ").replace("YA\\(Young Adult 21-30\\)", "Young Adult");
 
-      html += `
-        <div class="feature">
-          <b>${icon} ${label}
-            <span class="tooltip-icon" data-tooltip="${def}">ℹ️</span>
-          :</b> ${value}
-        </div>`;
+      if (directFields.includes(key)) {
+        const pred = video[`${key}_pred`] || "None";
+        const gt = video[`${key}_gt`] || "None";
+        const tooltip = `Predicted: ${pred}\nGround Truth: ${gt}`;
+
+        html += `
+          <div class="feature">
+            <b>${icon} ${label}
+              <span class="tooltip-icon" data-tooltip="${def}">ℹ️</span>
+              <span class="tooltip-icon" data-tooltip="${tooltip}">📌</span>
+            </b>
+          </div>`;
+      } else {
+        const gtVal = video[`${key}_gt`] ?? video[key];
+        const gtDisplay = tf(gtVal) === "Yes" ? "✅ Yes" : "❌ No";
+        html += `
+          <div class="feature">
+            <b>${icon} ${label}
+              <span class="tooltip-icon" data-tooltip="${def}">ℹ️</span>
+            :</b> ${gtDisplay}
+          </div>`;
+      }
     });
   }
+
   return html;
 }
+
 
 
 
