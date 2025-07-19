@@ -262,10 +262,6 @@ function renderGroupedAnnotations(video) {
     "Brand_Iceberg": "Mentions or displays the Iceberg brand.",
     "Vapes": "Presence or use of vape/e-cigarette products.",
     "False or misleading claims": "Contains misleading or false claims about nicotine or ONP.",
-    "VT_Entertaining": "Video is framed as fun, entertaining, or humorous.",
-    "VT_Anti_ONP": "Video takes a critical or negative stance toward ONP.",
-    "VT_Quit_with_ONP": "Suggests using ONP to quit smoking or vaping.",
-    "VT_ONP_Sport": "Relates ONP to sports, fitness, or athletic performance.",
     "human_subjects": "Video includes real people.",
     "ethnic_minority": "Person(s) appear from underrepresented racial/ethnic groups.",
     "Young Adult": "Main subject appears to be aged 21–30.",
@@ -275,55 +271,51 @@ function renderGroupedAnnotations(video) {
   };
 
   const icons = {
-    "Package": "📦", "Pouch": "", "ONP_use": "",
-    "Brand_ZYN": "🟢", "Brand_Velo": "🔵", "Brand_Iceberg": "🧊",
-    "Vapes": "💨", "False or misleading claims": "⚠️",
-    "VT_Entertaining": "🎉", "VT_Anti_ONP": "🚫", "VT_Quit_with_ONP": "🚭", "VT_ONP_Sport": "🏅",
+    "Package": "📦", "Pouch": "👜", "ONP_use": "🫦",
+    "Brand_ZYN": "🧃", "Brand_Velo": "🏁", "Brand_Iceberg": "❄️",
+    "Vapes": "🚬", "False or misleading claims": "⚠️",
     "human_subjects": "👤", "ethnic_minority": "🌍", "Young Adult": "🧑‍🎓",
     "Dominant_Brand": "🏷️", "Dominant_Flavor": "🍒", "Video_Theme": "🎬"
   };
 
-  const directTextFields = ["Dominant_Brand", "Dominant_Flavor", "Video_Theme"];
-  let html = "";
+  const htmlLines = [];
 
   for (const [group, keys] of Object.entries(groupedAnnotations)) {
-    html += `<h4 style="margin-top: 1rem; color: #2b6cb0;">${group}</h4>`;
+    htmlLines.push(`<h4 style="margin-top: 1rem; color: #2b6cb0;">${group}</h4>`);
 
     keys.forEach(key => {
-      const icon = icons[key] || "";
       const label = key.replace(/_/g, " ");
+      const icon = icons[key] || "";
       const def = definitions[key] || "";
 
-      const isText = directTextFields.includes(key);
-      const predVal = video[`${key}_pred`] ?? video[key];
+      const isMulticlass = key.includes("Dominant") || key === "Video_Theme";
+      const predVal = video[`${key}_pred`] ?? video[key] ?? "None";
       const gtVal = video[`${key}_gt`] ?? "None";
 
-      if (isText) {
-        html += `
+      if (isMulticlass) {
+        htmlLines.push(`
           <div class="feature">
             <b>${icon} ${label}
               <span class="tooltip-icon" data-tooltip="${def}">ℹ️</span>
               <span class="tooltip-icon" data-tooltip="Ground Truth: ${gtVal}">📌</span>
             :</b> ${predVal}
-          </div>`;
+          </div>`);
       } else {
-        const display = predVal === 1 || predVal === "1" ? "✅ Yes" : "❌ No";
-        const truth = gtVal === 1 || gtVal === "1" ? "Yes" : "No";
-        html += `
+        const display = predVal === 1 || predVal === "1" || predVal === "Yes" ? "✅ Yes" : "❌ No";
+        const truth = gtVal === 1 || gtVal === "1" || gtVal === "Yes" ? "Yes" : "No";
+        htmlLines.push(`
           <div class="feature">
             <b>${icon} ${label}
               <span class="tooltip-icon" data-tooltip="${def}">ℹ️</span>
               <span class="tooltip-icon" data-tooltip="Ground Truth: ${truth}">📌</span>
             :</b> ${display}
-          </div>`;
+          </div>`);
       }
     });
   }
 
-  return html;
+  return htmlLines.join("");
 }
-
-
 
 
 
